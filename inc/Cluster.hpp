@@ -1,26 +1,27 @@
 #ifndef CLUSTER_HPP
 # define CLUSTER_HPP
 
-#include <iostream>
-#include <vector>
-#include <map>
-#include <cstring>
-#include <unistd.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <poll.h>
+# include <iostream>
+# include <vector>
+# include <map>
+# include <cstring>
+# include <unistd.h>
+# include <netdb.h>
+# include <arpa/inet.h>
+# include <netinet/in.h>
+# include <sys/socket.h>
+# include <sys/types.h>
+# include <fcntl.h>
+# include <poll.h>
 
-#include <cerrno>
+# include <cerrno>
 
-#include "Server.hpp"
-#include "ft_utils.hpp"
+# include "Server.hpp"
+# include "Request.hpp"
+# include "ft_utils.hpp"
 
-#define MAXCLIENT 20
-#define BUFFSIZE 2048
+# define MAXCLIENT 20
+# define BUFFSIZE 2048
 
 class Cluster
 {
@@ -28,6 +29,7 @@ class Cluster
 		std::vector<Server>		_servers;
 		std::vector<pollfd>		_pollFDs;
 		std::map<int, Server *>	_clients;
+		std::map<int, Request *> _requests;
 
 		void	_startListen();
 		int		_startSocket(Server &Server, std::string port);

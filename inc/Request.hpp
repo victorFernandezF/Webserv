@@ -1,0 +1,50 @@
+#ifndef REQUEST_HPP
+# define REQUEST_HPP
+
+# include <iostream>
+# include <vector>
+# include <fstream>
+# include <sstream>
+
+# include <Server.hpp>
+
+class Request
+{
+	private:
+		int				_clientFD;
+		Server			_Server;
+
+		std::string		_path;
+		std::string		_method;
+		std::string		_version;
+		std::string		_header;
+		std::string		_body;
+
+		Request();
+
+		void	_parseRequest(std::string req);
+		void	_firstLine(std::string str);
+		//void	_body(std::string body);
+
+		void	_setPath(std::string path);
+		void	_setMethod(std::string method);
+		void	_setVersion(std::string version);
+		void	_setHeader(std::string header);
+		void	_setBody(std::string body);
+
+	public:
+		Request(std::string req, int fd, Server srv);
+		Request(Request const &src);
+		Request &operator=(Request const &rhs);
+		~Request();
+
+		std::string getPath() const;
+		std::string getMethod() const;
+		std::string getVersion() const;
+		std::string getBody() const;
+		std::string getHeader() const;
+};
+
+std::ostream	&operator<<(std::ostream &o, Request const &i);
+
+#endif
