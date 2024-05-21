@@ -1,6 +1,8 @@
 #ifndef CLUSTER_HPP
 # define CLUSTER_HPP
 
+# include <stdlib.h>
+
 # include <iostream>
 # include <vector>
 # include <map>

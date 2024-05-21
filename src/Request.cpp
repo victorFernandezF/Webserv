@@ -63,10 +63,17 @@ void	Request::_parseRequest(std::string req)
 		_firstLine(req.substr(0, pos));
 		req.erase(0, pos + 2);
 	}
-
+	//std::cout << std::endl << "Post first line: " << req << std::endl << std::endl;
 	if (req.find("\r\n\r\n") != std::string::npos)
 	{
-		_setBody(req.substr(pos + 4));
+		pos = req.find("\r\n\r\n");
+		_setHeader(req.substr(0, pos));
+		_setHeaderParams(req.substr(0, pos));
+		req.erase(0, pos + 4);
+	}
+	if (req.find("\r\n\r\n") != std::string::npos)
+	{
+		_setBody(req);
 	}
 }
 
@@ -83,9 +90,9 @@ void	Request::_firstLine(std::string str)
 	}
 	if (tmpVect.size() != 3)
 		return ;
+	size_t j = 1;
 	for (std::vector<std::string>::iterator it = tmpVect.begin(); it != tmpVect.end(); it++)
 	{
-		size_t j = 1;
 		tmp = *it;
 		ret.clear();
 		for (size_t i = 0; i < tmp.size(); i++)
@@ -102,6 +109,25 @@ void	Request::_firstLine(std::string str)
 		else if (j == 3)
 			_setVersion(ret);
 		j++;
+	}
+}
+
+void	Request::_setHeaderParams(std::string header)
+{
+	std::vector<std::string>	tmpVect;
+	std::istringstream			toRead(header);
+	std::string					tmp;
+	std::string					ret;
+	size_t						pos;
+
+	while (getline(toRead, tmp))
+	{
+		if (tmp.find(':') != std::string::npos)
+		{
+			pos = tmp.find(':');
+			//std::cout << "1-> " << tmp.substr(0, pos - 1) << "-----" << "2-> " << tmp.substr(pos) << std::endl;
+			this->_headerParams[tmp.substr(0, pos)] = tmp.substr(pos + 2);
+		}
 	}
 }
 
@@ -139,6 +165,11 @@ std::string	Request::getBody() const
 	return (this->_body);
 }
 
+std::map<std::string, std::string>	Request::getHeaderParams() const
+{
+	return (this->_headerParams);
+}
+
 void	Request::_setPath(std::string path)
 {
 	this->_path = path;
@@ -170,11 +201,16 @@ void	Request::_setBody(std::string body)
 
 std::ostream	&operator<<(std::ostream &o, Request const &i)
 {
-	(void)i;
-	std::cout << "Request info" << std::endl;
+	std::map<std::string, std::string>	hp = i.getHeaderParams();
+
+	std::cout << "Request info" << std::endl << std::endl;
 	std::cout << "Method: " << i.getMethod() << std::endl;
+	std::cout << "Version: " << i.getVersion() << std::endl;
 	std::cout << "Path: " << i.getPath() << std::endl;
-	std::cout << "Header: " << i.getHeader() << std::endl;
-	std::cout << "Body: " << i.getBody() << std::endl;
+	//std::cout << "Header: " << i.getHeader() << std::endl;
+	std::cout << std::endl << "Header params:" << std::endl;
+	for (std::map<std::string, std::string>::iterator it = hp.begin(); it != hp.end(); it++)
+		std::cout << it->first << " ----> " << it->second << std::endl;
+	std::cout << std::endl << "Body: " << i.getBody() << std::endl;
 	return (o);
 }

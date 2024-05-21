@@ -309,7 +309,11 @@ void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *s
 
 
 			buff[reads] = '\0';
-			std::cout << "Mensaje: " << buff << std::endl;
+			std::cout << std::endl << buff << std::endl;
+
+			Request req(buff, client.fd, *server);
+
+			std::cout << std::endl << req << std::endl;
 
 			std::string toReponse = "Recibido. Corto y cambio\n*****************************\n\0";
 			const char *msg = toReponse.c_str();
@@ -342,6 +346,7 @@ void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *s
 	this->_pollFDs.erase(_pollFDs.begin() + i);
 	i--;
 	pollSize--;
+	exit (1);
 }
 
 /* ************************************************************************** */

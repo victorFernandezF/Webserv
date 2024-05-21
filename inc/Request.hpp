@@ -3,6 +3,7 @@
 
 # include <iostream>
 # include <vector>
+# include <map>
 # include <fstream>
 # include <sstream>
 
@@ -19,6 +20,7 @@ class Request
 		std::string		_version;
 		std::string		_header;
 		std::string		_body;
+		std::map<std::string, std::string>	_headerParams;
 
 		Request();
 
@@ -31,6 +33,7 @@ class Request
 		void	_setVersion(std::string version);
 		void	_setHeader(std::string header);
 		void	_setBody(std::string body);
+		void	_setHeaderParams(std::string header);
 
 	public:
 		Request(std::string req, int fd, Server srv);
@@ -43,6 +46,7 @@ class Request
 		std::string getVersion() const;
 		std::string getBody() const;
 		std::string getHeader() const;
+		std::map<std::string, std::string>	getHeaderParams() const;
 };
 
 std::ostream	&operator<<(std::ostream &o, Request const &i);
