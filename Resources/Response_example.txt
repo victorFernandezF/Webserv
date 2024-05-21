@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+Date: Tue, 21 May 2024 14:19:27 GMT
+Expires: Tue, 21 May 2024 14:29:27 GMT
+Cache-Control: public, max-age=600
+ETag: "RygJ8w"
+X-Cloud-Trace-Context: eb143.....
+Content-Type: text/html
+Server: 127.0.0.1:4242
+Connection: close
+Content-Length: 7847
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 ....>
+....
