@@ -122,6 +122,15 @@ class	Config::errorReAssingHost : public std::exception
 		}
 };
 
+class	Config::errorNotValidHost : public std::exception
+{
+	public:
+		virtual const char *what(void) const throw()
+		{
+			return ("Error: listen host address not valid");
+		}
+};
+
 class	Config::errorReAssingListen : public std::exception
 {
 	public:
@@ -504,6 +513,8 @@ void	Config::_addServerParam(Server &srv, Location &location, std::string key, s
 			srv.setHost(_parseVal(val));
 		else
 			throw errorReAssingHost();
+		if (inet_addr(srv.getHost().c_str()) == (in_addr_t)(-1))
+			throw errorNotValidHost();
 	}
 	else if (key == "listen")
 	{

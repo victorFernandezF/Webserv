@@ -6,7 +6,7 @@
 /*   By: fortega- <fortega-@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/21 12:29:37 by fortega-          #+#    #+#             */
-/*   Updated: 2024/05/03 11:22:50 by fortega-         ###   ########.fr       */
+/*   Updated: 2024/05/22 10:10:14 by fortega-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <limits>
 # include <vector>
 
+std::string	ft_itoa(int nbr);
 int		ft_atoi(std::string const str);
 unsigned int		ft_atoiUnInt(std::string const str);
 bool	ft_atoiCheck(std::string const std_str);

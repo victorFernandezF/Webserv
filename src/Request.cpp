@@ -53,7 +53,7 @@ Request	&Request::operator=(Request const &rhs)
 /*                             MEMBER FUNCTIONS                               */
 /* ************************************************************************** */
 
-void	Request::_parseRequest(std::string req)
+/*void	Request::_parseRequest(std::string req)
 {
 	size_t pos;
 
@@ -75,6 +75,31 @@ void	Request::_parseRequest(std::string req)
 	{
 		_setBody(req);
 	}
+}*/
+
+void	Request::_parseRequest(std::string req)
+{
+	size_t pos;
+
+	if (req.find("\r\n") != std::string::npos)
+	{
+		pos = req.find("\r\n");
+		_firstLine(req.substr(0, pos));
+		req.erase(0, pos + 2);
+	}
+	//std::cout << std::endl << "Post first line: " << req << std::endl << std::endl;
+	if (req.find("\r\n\r\n") != std::string::npos)
+	{
+		pos = req.find("\r\n\r\n");
+		_setHeader(req.substr(0, pos));
+		_setHeaderParams(req.substr(0, pos));
+		req.erase(0, pos + 4);
+		_setBody(req);
+	}
+	//if (req.find("\r\n\r\n") != std::string::npos)
+	//{
+		//std::cout << "Resto request pre body: " << std::endl << req << std::endl;
+	//}
 }
 
 void	Request::_firstLine(std::string str)
@@ -211,6 +236,6 @@ std::ostream	&operator<<(std::ostream &o, Request const &i)
 	std::cout << std::endl << "Header params:" << std::endl;
 	for (std::map<std::string, std::string>::iterator it = hp.begin(); it != hp.end(); it++)
 		std::cout << it->first << " ----> " << it->second << std::endl;
-	std::cout << std::endl << "Body: " << i.getBody() << std::endl;
+	std::cout << std::endl << "Body: " << std::endl << i.getBody() << std::endl;
 	return (o);
 }

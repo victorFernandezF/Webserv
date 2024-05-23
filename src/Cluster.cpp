@@ -95,7 +95,7 @@ void	Cluster::_startListen()
 	}
 }
 
-int		Cluster::_startSocket(Server &Server, std::string port)
+/*int		Cluster::_startSocket(Server &Server, std::string port)
 {
 	(void)Server;
 	struct addrinfo			hints;			//para las flags
@@ -108,6 +108,8 @@ int		Cluster::_startSocket(Server &Server, std::string port)
 	hints.ai_family = AF_UNSPEC; 		//Permitir IPv4 o IPv6
 	hints.ai_socktype = SOCK_STREAM;	//Protocolo TCP
 	hints.ai_flags = AI_PASSIVE;		//Indica socket para la escucha, dirección IP local
+
+	//sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // 127.0.0.1, localhos
 
 
 	//Necesario cambiar AI_PASSIVE a la dirección del archivo de configuración!!!!!
@@ -138,7 +140,48 @@ int		Cluster::_startSocket(Server &Server, std::string port)
 	if (status != 0)
 		throw errorNonBlockFD();
 	return (fd);
+}*/
+
+int		Cluster::_startSocket(Server &server, std::string port)
+{
+	//struct addrinfo			hints;			//para las flags
+	//struct addrinfo			*result;		//almacenar resultados
+
+	struct sockaddr_in 		sa;
+	int						fd;
+	int						status;
+
+	//Rellenar datos para el socket
+	bzero(&sa, sizeof(sa));	//Todo a 0
+	sa.sin_family = AF_INET; 		//Permitir IPv4 o IPv6
+	sa.sin_addr.s_addr = inet_addr(server.getHost().c_str());		//Indica socket para la escucha, dirección IP local
+	sa.sin_port = htons(ft_atoiUnInt(port));
+
+	//sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // 127.0.0.1, localhos
+
+	fd = socket(sa.sin_family, SOCK_STREAM, 0); //Generar FD de socket
+	status = bind(fd, (struct sockaddr *)&sa, sizeof sa);	//Asigna dirección local para la escucha
+	if (status != 0)
+	{
+		std::cout << "[Server] Bind error: [" << status << "] -> " << strerror(errno) << std::endl;
+		throw errorBindSocket();
+	}
+
+
+
+	//Añadir control de errores y no utilar errno!!!!
+
+
+
+	status = listen(fd, MAXCLIENT);				//Escucha en el fd del socket con cola de 20
+	if (status != 0)
+		throw errorListenSocket();
+	status = fcntl(fd, F_SETFL, O_NONBLOCK);	//Establece el fd obejetivo en no bloqueante
+	if (status != 0)
+		throw errorNonBlockFD();
+	return (fd);
 }
+
 
 void	Cluster::_makeServerPolls()
 {
@@ -315,10 +358,13 @@ void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *s
 
 			std::cout << std::endl << req << std::endl;
 
-			std::string toReponse = "Recibido. Corto y cambio\n*****************************\n\0";
-			const char *msg = toReponse.c_str();
+			//std::string toReponse = "Recibido. Corto y cambio\n*****************************\n\0";
+			std::string toResponse = _makeResponse();
+			const char *msg = toResponse.c_str();
             int msg_len = strlen(msg);
             int bytes_sent;
+
+			std::cout << "Response: " << std::endl << msg << std::endl;
 
 			bytes_sent = send(client.fd, msg, msg_len, 0);
             if (bytes_sent == -1)
@@ -327,7 +373,8 @@ void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *s
             }
             else if (bytes_sent == msg_len)
 			{
-				std::cerr << "Sent full message to client socket " << client.fd << ": " << msg << std::endl;
+				std::cerr << std::endl << "Sent full message to client socket " << client.fd << ": " 
+				<< std::endl << std::endl << msg << std::endl << std::endl;
             }
             else 
 			{
@@ -346,7 +393,46 @@ void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *s
 	this->_pollFDs.erase(_pollFDs.begin() + i);
 	i--;
 	pollSize--;
-	exit (1);
+	//exit (1);
+}
+
+std::string	Cluster::_makeResponse()
+{
+	std::ifstream	file("./root/index.html");
+	std::string		line;
+	std::string		header;
+	std::string 	body;
+
+	//if (!file.is_open())
+	/*	std::cout << "index.html NO abierto" << std::endl;
+	else
+		std::cout << "index.html abierto" << std::endl;*/
+
+	while (getline(file, line))
+	{
+		//std::cout << "Linea index.html: " << line << std::endl;  
+		body += line;
+		body += '\n';
+	}
+
+	file.close();
+
+	//std::cout << "index.html: " << std::endl << body << std::endl;
+
+	header += "HTTP/1.1 200 OK";
+	header += "\r\n";
+	header += "Connection: close";
+	header += "\r\n";
+	header += "Content-Length: ";
+	header += ft_itoa(body.size());
+	header += "\r\n";
+	header += "\r\n";
+	header += body;
+	header += "\r\n\r\n";
+
+	std::cout << std::endl;
+
+	return (header);
 }
 
 /* ************************************************************************** */

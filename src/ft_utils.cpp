@@ -6,7 +6,7 @@
 /*   By: fortega- <fortega-@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/21 12:30:32 by fortega-          #+#    #+#             */
-/*   Updated: 2024/05/15 16:03:10 by fortega-         ###   ########.fr       */
+/*   Updated: 2024/05/22 11:08:47 by fortega-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,29 @@
 unsigned short	error_codes[] = {400, 401, 402, 403, 404, 405, 406, 407, 408, 409,
 								410, 411, 412, 413, 414, 415, 416, 417, 421, 422,
 								426, 500, 501, 503, 504, 505};
+
+std::string	ft_itoa(int nbr)
+{
+	std::string	str;
+	
+	if (nbr < 0)
+	{
+		str += '-';
+		nbr = -nbr;
+	}
+	if (nbr == 0)
+	{
+		str += '0';
+		//str += '\0';
+	}
+	while (nbr > 0)
+	{
+		str += (nbr % 10) + '0';
+		nbr = nbr / 10;
+	}
+	//str += '\0';
+	return (str);
+}
 
 int		ft_strlen(const char *str)
 {

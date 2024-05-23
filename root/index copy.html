@@ -1,14 +1,3 @@
-HTTP/1.1 200 OK
-Date: Tue, 21 May 2024 14:19:27 GMT
-Expires: Tue, 21 May 2024 14:29:27 GMT
-Cache-Control: public, max-age=600
-ETag: "RygJ8w"
-X-Cloud-Trace-Context: eb143.....
-Content-Type: text/html
-Server: 127.0.0.1:4242
-Connection: close
-Content-Length: 847
-
 <!DOCTYPE html>
 <html lang="es-ES">
   <head>
@@ -17,7 +6,7 @@ Content-Length: 847
   </head>
   <body>
 
-	<form action="127.0.0.1:4242">
+	<form action="" method="post">
 		<fieldset>
 		<legend>Contacto</legend>
 		<div class="form-control">
@@ -48,5 +37,11 @@ Content-Length: 847
 		<input type="submit" value="Enviar" class="submit-btn" />
 		</fieldset>
 	</form>
+	<form action = "/cgi-bin/cpp_get.cgi" method = "post">
+		First Name: <input type = "text" name = "first_name"><br />
+		Last Name: <input type = "text" name = "last_name" />
+	  
+		<input type = "submit" value = "Submit" />
+	 </form>
   </body>
 </html>

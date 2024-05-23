@@ -2,6 +2,7 @@
 # define CLUSTER_HPP
 
 # include <stdlib.h>
+# include <stdio.h>
 
 # include <iostream>
 # include <vector>
@@ -34,13 +35,15 @@ class Cluster
 		std::map<int, Request *> _requests;
 
 		void	_startListen();
-		int		_startSocket(Server &Server, std::string port);
+		int		_startSocket(Server &server, std::string port);
 		
 		void	_makeServerPolls();
 		bool	_isServerFD(int fd);
 		pollfd	_makeClientPoll(int fd);
 		Server	*_getServerbyFD(int fd);
 		void	_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *server);
+
+		std::string	_makeResponse();
 
 	public:
 		Cluster();

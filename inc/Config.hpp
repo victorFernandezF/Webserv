@@ -58,6 +58,7 @@ class Config
 		class errorUnpairErrorPage;
 		class errorCodePageError;
 		class errorReAssingHost;
+		class errorNotValidHost;
 		class errorReAssingListen;
 		class errorReAssingRoot;
 		class errorReAssingClientBodySize;
