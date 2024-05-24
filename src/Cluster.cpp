@@ -66,6 +66,7 @@ Cluster::Cluster(Cluster const &src)
 
 Cluster::~Cluster()
 {
+	_closeFDs();
 	return ;
 }
 
@@ -422,6 +423,8 @@ std::string	Cluster::_makeResponse()
 	header += "HTTP/1.1 200 OK";
 	header += "\r\n";
 	header += "Connection: close";
+	header += "\r\n";
+	header += "Content-Type: text/html; charset=utf-8";
 	header += "\r\n";
 	header += "Content-Length: ";
 	header += ft_itoa(body.size());
