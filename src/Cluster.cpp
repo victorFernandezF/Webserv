@@ -60,7 +60,10 @@ Cluster::Cluster()
 
 Cluster::Cluster(Cluster const &src)
 {
-	*this = src;
+	this->_servers = src._servers;
+	this->_pollFDs = src._pollFDs;
+	this->_clients = src._clients;
+	this->_requests = src._requests;
 	return ;
 }
 
@@ -76,7 +79,13 @@ Cluster::~Cluster()
 
 Cluster	&Cluster::operator=(Cluster const &rhs)
 {
-	(void)rhs;
+	if (this != &rhs)
+	{
+		this->_servers = rhs._servers;
+		this->_pollFDs = rhs._pollFDs;
+		this->_clients = rhs._clients;
+		this->_requests = rhs._requests;
+	}
 	return (*this);
 }
 
@@ -96,58 +105,8 @@ void	Cluster::_startListen()
 	}
 }
 
-/*int		Cluster::_startSocket(Server &Server, std::string port)
-{
-	(void)Server;
-	struct addrinfo			hints;			//para las flags
-	struct addrinfo			*result;		//almacenar resultados
-	int						fd;
-	int						status;
-
-	//Rellenar datos para el socket
-	bzero(&hints, sizeof(hints));	//Todo a 0
-	hints.ai_family = AF_UNSPEC; 		//Permitir IPv4 o IPv6
-	hints.ai_socktype = SOCK_STREAM;	//Protocolo TCP
-	hints.ai_flags = AI_PASSIVE;		//Indica socket para la escucha, dirección IP local
-
-	//sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // 127.0.0.1, localhos
-
-
-	//Necesario cambiar AI_PASSIVE a la dirección del archivo de configuración!!!!!
-
-
-	status = getaddrinfo(NULL, port.c_str(), &hints, &result); //parseo y relleno de result
-	if (status != 0)
-		throw errorParseListenPort();
-
-	fd = socket(result->ai_family, result->ai_socktype, result->ai_protocol); //Generar FD de socket
-	status = bind(fd, result->ai_addr, result->ai_addrlen);	//Asigna dirección local para la escucha
-	if (status != 0)
-	{
-		std::cout << "[Server] Bind error: [" << status << "] -> " << strerror(errno) << std::endl;
-		throw errorBindSocket();
-	}
-
-
-
-	//Añadir control de errores y no utilar errno!!!!
-
-
-
-	status = listen(fd, MAXCLIENT);				//Escucha en el fd del socket con cola de 20
-	if (status != 0)
-		throw errorListenSocket();
-	status = fcntl(fd, F_SETFL, O_NONBLOCK);	//Establece el fd obejetivo en no bloqueante
-	if (status != 0)
-		throw errorNonBlockFD();
-	return (fd);
-}*/
-
 int		Cluster::_startSocket(Server &server, std::string port)
 {
-	//struct addrinfo			hints;			//para las flags
-	//struct addrinfo			*result;		//almacenar resultados
-
 	struct sockaddr_in 		sa;
 	int						fd;
 	int						status;
@@ -158,22 +117,10 @@ int		Cluster::_startSocket(Server &server, std::string port)
 	sa.sin_addr.s_addr = inet_addr(server.getHost().c_str());		//Indica socket para la escucha, dirección IP local
 	sa.sin_port = htons(ft_atoiUnInt(port));
 
-	//sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // 127.0.0.1, localhos
-
 	fd = socket(sa.sin_family, SOCK_STREAM, 0); //Generar FD de socket
 	status = bind(fd, (struct sockaddr *)&sa, sizeof sa);	//Asigna dirección local para la escucha
 	if (status != 0)
-	{
-		std::cout << "[Server] Bind error: [" << status << "] -> " << strerror(errno) << std::endl;
 		throw errorBindSocket();
-	}
-
-
-
-	//Añadir control de errores y no utilar errno!!!!
-
-
-
 	status = listen(fd, MAXCLIENT);				//Escucha en el fd del socket con cola de 20
 	if (status != 0)
 		throw errorListenSocket();
@@ -193,7 +140,7 @@ void	Cluster::_makeServerPolls()
 		{
 			struct pollfd 			pollFd;
 			pollFd.fd = *fd;
-			pollFd.events = POLLIN; //cambio a monitorizar de lectura
+			pollFd.events = POLLIN; //asignar monitorizacion de lectura
 			this->_pollFDs.push_back(pollFd);
 		}
 	}
@@ -201,8 +148,6 @@ void	Cluster::_makeServerPolls()
 
 void	Cluster::runServers()
 {
-
-	//Añadir control de errores y no utilar errno!!!!
 	//Revisar tema de MAXCLIENTS
 
 
@@ -226,7 +171,6 @@ void	Cluster::runServers()
 		int	tmpFD;
 		int	status;
 		size_t	pollSize = _pollFDs.size();
-		//int	pollSize = this->_pollFDs.size();
 		status = poll(_pollFDs.data(), _pollFDs.size(), 1000); //esperar 1 segs (ms) a cambios
 		if (status == -1)
 		{
@@ -248,33 +192,36 @@ void	Cluster::runServers()
 			}
 			for (size_t i = 0; i < pollSize; i++)
 			{
-				if ((_pollFDs[i].revents & POLLIN) != 1)
-					//operador de bits sobre revents y POLLIN
-					//si no concide, comprueba siguiente socket
-					continue ;
-				if (_isServerFD(_pollFDs[i].fd) && pollSize < MAXCLIENT)
+				if (_pollFDs[i].revents & POLLIN)
 				{
-					//Si el socket con cambios es del servidor
-					//aceptar conexión y generar socket cliente
-
-					tmpFD = accept(_pollFDs[i].fd, (struct sockaddr *)&client_addr, &addr_size);
-					if (tmpFD == -1 || fcntl(tmpFD,  F_SETFL, O_NONBLOCK) == -1)
+					if (_isServerFD(_pollFDs[i].fd) && pollSize < MAXCLIENT)
 					{
-						std::cerr << "Error generar socket cliente: " << strerror(errno) << std::endl;
-						continue ;
+						//Si el socket con cambios es del servidor
+						//aceptar conexión y generar socket cliente
+
+						tmpFD = accept(_pollFDs[i].fd, (struct sockaddr *)&client_addr, &addr_size);
+						if (tmpFD == -1 || fcntl(tmpFD,  F_SETFL, O_NONBLOCK) == -1)
+						{
+							std::cerr << "Error accepting client" << std::endl;
+							continue ;
+						}
+						std::cout << "Cliente conectado en fd: " << tmpFD << std::endl;
+						_clients[tmpFD] = _getServerbyFD(_pollFDs[i].fd);
+						_pollFDs.push_back(_makeClientPoll(tmpFD));
 					}
-					std::cout << "Cliente conectado en fd: " << tmpFD << std::endl;
-					_clients[tmpFD] = _getServerbyFD(_pollFDs[i].fd);
-					_pollFDs.push_back(_makeClientPoll(tmpFD));
+					else if (_isServerFD(_pollFDs[i].fd) && _pollFDs.size() >= MAXCLIENT)
+					{
+						std::cerr << "Maximo de clientes alcanzados" << std::endl;
+					}
+					else if (!_isServerFD(_pollFDs[i].fd) && pollSize < MAXCLIENT)
+					{
+						//Si no es el socket servidor, es un socket cliente, leer
+						_readClient(i, pollSize, _pollFDs[i], _clients[_pollFDs[i].fd]);
+					}
 				}
-				else if (_isServerFD(_pollFDs[i].fd) && _pollFDs.size() >= MAXCLIENT)
+				if (_pollFDs[i].revents & POLLOUT && !_isServerFD(_pollFDs[i].fd))
 				{
-					std::cerr << "Maximo de clientes alcanzados" << std::endl;
-				}
-				else
-				{
-					//Si no es el socket servidor, es un socket cliente, leer
-					_readClient(i, pollSize, _pollFDs[i], _clients[_pollFDs[i].fd]);
+					_response(i, pollSize, _pollFDs[i]);
 				}
 			}
 		}
@@ -327,7 +274,7 @@ pollfd	Cluster::_makeClientPoll(int fd)
 	struct pollfd	pollFd;
 
 	pollFd.fd = fd;
-	pollFd.events = POLLIN; //cambio a monitorizar de lectura
+	pollFd.events = POLLIN; //asignar monitorizacion de lectura
 	return (pollFd);
 }
 
@@ -336,65 +283,72 @@ void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *s
 	std::cout << "Recibiendo datos de cliente en fd: " << client.fd << ", de servidor: "
 	<< server->getServerName() << std::endl;
 
-	char	buff[BUFFSIZE];
-	int		reads = recv(client.fd, buff, BUFFSIZE, 0);
-	if (reads >= 0)
+	char		buff[BUFFSIZE];
+	std::string	tmp;
+	int			reads = 0;
+	size_t		loop = 0;
+
+	while (reads >= 0)
 	{
-		if (reads == 0)
+		loop++;
+		reads = recv(client.fd, buff, BUFFSIZE, 0);
+		if (reads == -1 && loop == 1)
 		{
-			std::cout << "Conexión cerrada de cliente en fd (0 reads): " << client.fd << std::endl;
+			close(client.fd);
+			_clients.erase(client.fd);
+			this->_pollFDs.erase(_pollFDs.begin() + i);
+			i--;
+			pollSize--;
+			std::cout << "Error reading from client" << std::endl;
+			return ;
+		}
+		if (!(reads >= 0))
+		{
+			std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
+			tmp.insert(tmp.end(), '\0', 1);
+			client.events = POLLOUT;
+			_requests[client.fd] = Request(tmp, client.fd, *server);
+			std::cout << Request(tmp, client.fd, *server) << std::endl;
+ 			return ;
 		}
 		else
 		{
-
-
-			//Respuesta futura tras parseo de peticion
-
-
-
-			buff[reads] = '\0';
-			std::cout << std::endl << buff << std::endl;
-
-			Request req(buff, client.fd, *server);
-
-			std::cout << std::endl << req << std::endl;
-
-			//std::string toReponse = "Recibido. Corto y cambio\n*****************************\n\0";
-			std::string toResponse = _makeResponse();
-			const char *msg = toResponse.c_str();
-            int msg_len = strlen(msg);
-            int bytes_sent;
-
-			std::cout << "Response: " << std::endl << msg << std::endl;
-
-			bytes_sent = send(client.fd, msg, msg_len, 0);
-            if (bytes_sent == -1)
-			{
-				std::cerr << "send error: " << strerror(errno) << std::endl;
-            }
-            else if (bytes_sent == msg_len)
-			{
-				std::cerr << std::endl << "Sent full message to client socket " << client.fd << ": " 
-				<< std::endl << std::endl << msg << std::endl << std::endl;
-            }
-            else 
-			{
-				std::cerr << "Sent partial message to client socket " << client.fd << ": " << bytes_sent
-				<< " bytes sent" << std::endl;
-            }
+			tmp.insert(tmp.end(), buff, buff + reads);
 		}
 	}
-	else if (reads == -1)
+}
+
+void	Cluster::_response(size_t &i, size_t &pollSize, pollfd &client)
+{
+	std::string toResponse = _makeResponse();
+	const char *msg = toResponse.c_str();
+	int msg_len = strlen(msg);
+	int bytes_sent;
+
+	std::cout << "Response: " << std::endl << msg << std::endl;
+
+	bytes_sent = send(client.fd, msg, msg_len, 0);
+	if (bytes_sent == -1)
 	{
-		std::cerr << "recv error: " << strerror(errno) << std::endl;
+		std::cerr << "send error: " << strerror(errno) << std::endl;
+	}
+	else if (bytes_sent == msg_len)
+	{
+		std::cerr << std::endl << "Sent full message to client socket " << client.fd << ": " 
+		<< std::endl << std::endl;
+	}
+	else 
+	{
+		std::cerr << "Sent partial message to client socket " << client.fd << ": " << bytes_sent
+		<< " bytes sent" << std::endl;
 	}
 	std::cout << "Cerrando transmision con cliente " << client.fd << std::endl;
 	close(client.fd);
 	_clients.erase(client.fd);
 	this->_pollFDs.erase(_pollFDs.begin() + i);
+	_requests.erase(_pollFDs[i].fd);
 	i--;
 	pollSize--;
-	//exit (1);
 }
 
 std::string	Cluster::_makeResponse()
@@ -404,21 +358,13 @@ std::string	Cluster::_makeResponse()
 	std::string		header;
 	std::string 	body;
 
-	//if (!file.is_open())
-	/*	std::cout << "index.html NO abierto" << std::endl;
-	else
-		std::cout << "index.html abierto" << std::endl;*/
-
 	while (getline(file, line))
 	{
-		//std::cout << "Linea index.html: " << line << std::endl;  
 		body += line;
 		body += '\n';
 	}
 
 	file.close();
-
-	//std::cout << "index.html: " << std::endl << body << std::endl;
 
 	header += "HTTP/1.1 200 OK";
 	header += "\r\n";

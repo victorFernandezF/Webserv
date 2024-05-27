@@ -12,7 +12,6 @@ class Location
 		bool						_autoindex;
 		std::string					_index;
 		std::vector<std::string>	_methods;
-		std::string					_bin;
 		std::string					_return;
 		std::string					_compiler;
 
@@ -29,7 +28,6 @@ class Location
 		void	setAutoIndex(bool autoIndex);
 		void	setIndex(std::string index);
 		void	setMethods(std::vector<std::string> methods);
-		void	setBin(std::string bin);
 		void	setReturn(std::string ret);
 		void	setCompiler(std::string comp);
 
@@ -38,7 +36,6 @@ class Location
 		bool		getAutoIndex();
 		std::string	getIndex();
 		std::vector<std::string>	getMethods();
-		std::string	getBin();
 		std::string	getReturn();
 		std::string getCompiler();
 
@@ -47,7 +44,6 @@ class Location
 		
 		class	rootReAsing;
 		class	badMethod;
-		class	binReAsing;
 		class	indexDup;
 		class	methodDup;
 		class	returnDup;

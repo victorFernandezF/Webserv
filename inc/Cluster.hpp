@@ -32,7 +32,7 @@ class Cluster
 		std::vector<Server>		_servers;
 		std::vector<pollfd>		_pollFDs;
 		std::map<int, Server *>	_clients;
-		std::map<int, Request *> _requests;
+		std::map<int, Request> _requests;
 
 		void	_startListen();
 		int		_startSocket(Server &server, std::string port);
@@ -43,6 +43,7 @@ class Cluster
 		Server	*_getServerbyFD(int fd);
 		void	_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *server);
 
+		void	_response(size_t &i, size_t &pollSize, pollfd &client);
 		std::string	_makeResponse();
 
 	public:

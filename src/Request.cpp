@@ -24,7 +24,14 @@ Request::Request(std::string req, int fd, Server srv)
 
 Request::Request(Request const &src)
 {
-	*this = src;
+	this->_clientFD = src._clientFD;
+	this->_Server = src._Server;
+	this->_path = src._path;
+	this->_method = src._method;
+	this->_version = src._version;
+	this->_header = src._header;
+	this->_body = src._body;
+	this->_headerParams = src._headerParams;
 	return ;
 }
 
@@ -39,7 +46,17 @@ Request::~Request()
 
 Request	&Request::operator=(Request const &rhs)
 {
-	(void)rhs;
+	if (this != &rhs)
+	{
+		this->_clientFD = rhs._clientFD;
+		this->_Server = rhs._Server;
+		this->_path = rhs._path;
+		this->_method = rhs._method;
+		this->_version = rhs._version;
+		this->_header = rhs._header;
+		this->_body = rhs._body;
+		this->_headerParams = rhs._headerParams;
+	}
 	return (*this);
 }
 
@@ -53,30 +70,6 @@ Request	&Request::operator=(Request const &rhs)
 /*                             MEMBER FUNCTIONS                               */
 /* ************************************************************************** */
 
-/*void	Request::_parseRequest(std::string req)
-{
-	size_t pos;
-
-	if (req.find("\r\n") != std::string::npos)
-	{
-		pos = req.find("\r\n");
-		_firstLine(req.substr(0, pos));
-		req.erase(0, pos + 2);
-	}
-	//std::cout << std::endl << "Post first line: " << req << std::endl << std::endl;
-	if (req.find("\r\n\r\n") != std::string::npos)
-	{
-		pos = req.find("\r\n\r\n");
-		_setHeader(req.substr(0, pos));
-		_setHeaderParams(req.substr(0, pos));
-		req.erase(0, pos + 4);
-	}
-	if (req.find("\r\n\r\n") != std::string::npos)
-	{
-		_setBody(req);
-	}
-}*/
-
 void	Request::_parseRequest(std::string req)
 {
 	size_t pos;
@@ -87,7 +80,6 @@ void	Request::_parseRequest(std::string req)
 		_firstLine(req.substr(0, pos));
 		req.erase(0, pos + 2);
 	}
-	//std::cout << std::endl << "Post first line: " << req << std::endl << std::endl;
 	if (req.find("\r\n\r\n") != std::string::npos)
 	{
 		pos = req.find("\r\n\r\n");
@@ -96,10 +88,6 @@ void	Request::_parseRequest(std::string req)
 		req.erase(0, pos + 4);
 		_setBody(req);
 	}
-	//if (req.find("\r\n\r\n") != std::string::npos)
-	//{
-		//std::cout << "Resto request pre body: " << std::endl << req << std::endl;
-	//}
 }
 
 void	Request::_firstLine(std::string str)
@@ -232,7 +220,6 @@ std::ostream	&operator<<(std::ostream &o, Request const &i)
 	std::cout << "Method: " << i.getMethod() << std::endl;
 	std::cout << "Version: " << i.getVersion() << std::endl;
 	std::cout << "Path: " << i.getPath() << std::endl;
-	//std::cout << "Header: " << i.getHeader() << std::endl;
 	std::cout << std::endl << "Header params:" << std::endl;
 	for (std::map<std::string, std::string>::iterator it = hp.begin(); it != hp.end(); it++)
 		std::cout << it->first << " ----> " << it->second << std::endl;

@@ -22,8 +22,6 @@ class Request
 		std::string		_body;
 		std::map<std::string, std::string>	_headerParams;
 
-		Request();
-
 		void	_parseRequest(std::string req);
 		void	_firstLine(std::string str);
 		//void	_body(std::string body);
@@ -36,6 +34,7 @@ class Request
 		void	_setHeaderParams(std::string header);
 
 	public:
+		Request();
 		Request(std::string req, int fd, Server srv);
 		Request(Request const &src);
 		Request &operator=(Request const &rhs);

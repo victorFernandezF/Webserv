@@ -20,14 +20,6 @@ class	Location::badMethod: public std::exception
 	}
 };
 
-class	Location::binReAsing: public std::exception
-{
-	virtual const char	*what() const throw ()
-	{
-		return ("Error: reasignation of binary cgi in a location");
-	}
-};
-
 class	Location::indexDup: public std::exception
 {
 	virtual const char	*what() const throw ()
@@ -76,8 +68,8 @@ Location::Location(Location const &src)
 	this->_autoindex = src._autoindex;
 	this->_index = src._index;
 	this->_methods = src._methods;
-	this->_bin = src._bin;
 	this->_return = src._return;
+	this->_compiler = src._compiler;
 	return ;
 }
 
@@ -99,8 +91,8 @@ Location	&Location::operator=(Location const &rhs)
 		this->_autoindex = rhs._autoindex;
 		this->_index = rhs._index;
 		this->_methods = rhs._methods;
-		this->_bin = rhs._bin;
 		this->_return = rhs._return;
+		this->_compiler = rhs._compiler;
 	}
 	return (*this);
 }
@@ -136,7 +128,6 @@ void	Location::clear()
 	_autoindex = false;
 	_index.clear();
 	_methods.clear();
-	_bin.clear();
 	_return.clear();
 	_compiler.clear();
 }
@@ -186,14 +177,6 @@ void	Location::setMethods(std::vector<std::string> methods)
 		this->_methods = methods;
 }
 
-void	Location::setBin(std::string bin)
-{
-	if (_bin.size() == 0)
-		this->_bin = bin;
-	else
-		throw binReAsing();
-}
-
 void	Location::setReturn(std::string ret)
 {
 	if (_return.size() == 0)
@@ -233,11 +216,6 @@ std::string	Location::getIndex()
 std::vector<std::string>	Location::getMethods()
 {
 	return (this->_methods);
-}
-
-std::string	Location::getBin()
-{
-	return (this->_bin);
 }
 
 std::string	Location::getReturn()

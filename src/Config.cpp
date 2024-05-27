@@ -290,7 +290,9 @@ Config::Config(std::string file, Cluster &cluster): _file(file)
 
 Config::Config(Config const &src)
 {
-	*this = src;
+	this->_file = src._file;
+	this->_fLines = src._fLines;
+	this->_servers = src._servers;
 	return ;
 }
 
@@ -305,7 +307,12 @@ Config::~Config()
 
 Config	&Config::operator=(Config const &rhs)
 {
-	(void)rhs;
+	if (this != &rhs)
+	{
+		this->_file = rhs._file;
+		this->_fLines = rhs._fLines;
+		this->_servers = rhs._servers;
+	}
 	return (*this);
 }
 
