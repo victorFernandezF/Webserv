@@ -2,6 +2,7 @@
 # define RESPONSE_HPP
 
 # include <iostream>
+# include <map>
 
 # include <Server.hpp>
 # include <Request.hpp>
@@ -27,6 +28,10 @@ class Response
 			int		_clientFD;
 
 			Response();
+			std::string	_getErrorPage(unsigned short nbr);
+			std::string	_makeErrorPage(unsigned short nrb);
+			std::string	_makeHtmlHead(std::string title);
+			std::string _makeHtmlTail();
 
 	public:
 		Response(Response const &src);

@@ -83,6 +83,73 @@ int	Response::getClientFD() const
 	return (_clientFD);
 }
 
+std::string	Response::_getErrorPage(unsigned short nbr)
+{
+	std::string	ret;
+	std::string filePath;
+	std::map<unsigned short, std::string>	pages = _srv.getErrorPageMap();
+
+	if (pages.find(nbr) != pages.end())
+		filePath = pages[nbr];
+	if (!filePath.empty())
+	{
+		std::ifstream	file(filePath.c_str());
+		std::string		line;
+		if (file.is_open())
+		{
+			while (getline(file, line))
+			{
+				ret += line;
+				ret += '\n';
+			}
+			return (ret);
+		}
+		else
+		{
+			return (_makeErrorPage(nbr));
+		}
+	}
+	else
+	{
+		return (_makeErrorPage(nbr));
+	}
+}
+
+std::string	Response::_makeErrorPage(unsigned short nbr)
+{
+	(void)nbr;
+	std::string ret;
+
+	return (ret);
+}
+
+std::string	Response::_makeHtmlHead(std::string title)
+{
+	std::string ret;
+
+	ret += "<!DOCTYPE html>\n";
+	ret += "<html>\n";
+	ret += "\t<head>\n";
+	ret += "\t\t<title>";
+	ret += title;
+	ret += "</title>\n";
+	ret += "\t</head>\n";
+	ret += "\t<body>\n";
+
+	return (ret);
+}
+
+std::string Response::_makeHtmlTail()
+{
+	std::string ret;
+
+	ret += ret += "\t</body>\n";
+	ret += "</html>\n";
+
+	return (ret);
+}
+
+
 /* ************************************************************************** */
 /*                            NON MEMBER OVERLOAD                             */
 /* ************************************************************************** */
