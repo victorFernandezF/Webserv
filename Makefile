@@ -6,7 +6,8 @@ SRC_FILES	=	main.cpp \
 			Server.cpp \
 			Location.cpp \
 			Cluster.cpp \
-			Request.cpp
+			Request.cpp \
+			Response.cpp
 
 SRC 		= ${addprefix ${SRC_DIR}, ${SRC_FILES}}
 

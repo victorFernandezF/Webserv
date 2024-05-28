@@ -193,37 +193,37 @@ void	Location::setCompiler(std::string comp)
 		throw compilerDup();
 }
 
-std::string	Location::getLocation()
+std::string	Location::getLocation() const
 {
 	return (this->_location);
 }
 
-std::string	Location::getRoot()
+std::string	Location::getRoot() const
 {
 	return (this->_root);
 }
 
-bool		Location::getAutoIndex()
+bool		Location::getAutoIndex() const
 {
 	return (this->_autoindex);
 }
 
-std::string	Location::getIndex()
+std::string	Location::getIndex() const
 {
 	return (this->_index);
 }
 
-std::vector<std::string>	Location::getMethods()
+std::vector<std::string>	Location::getMethods() const
 {
 	return (this->_methods);
 }
 
-std::string	Location::getReturn()
+std::string	Location::getReturn() const
 {
 	return (this->_return);
 }
 
-std::string Location::getCompiler()
+std::string Location::getCompiler() const
 {
 	return (this->_compiler);
 }
@@ -234,6 +234,17 @@ std::string Location::getCompiler()
 
 std::ostream	&operator<<(std::ostream &o, Location const &i)
 {
-	(void)i;
+	std::vector<std::string>				mth = i.getMethods();
+
+	std::cout << "Location info:" << std::endl << std::endl;
+	std::cout << "Location: " << i.getLocation() << std::endl;
+	std::cout << "Root: " << i.getRoot() << std::endl;
+	std::cout << "Autoindex = " << i.getAutoIndex() << std::endl;
+	std::cout << "Index: " << i.getIndex() << std::endl;
+	std::cout << "Methods:" << std::endl;
+	for (std::vector<std::string>::iterator it = mth.begin(); it != mth.end(); it++)
+		std::cout << *it << std::endl;
+	std::cout << "Return: " << i.getReturn() << std::endl;
+	std::cout << "Compiler: " << i.getCompiler() << std::endl;
 	return (o);
 }

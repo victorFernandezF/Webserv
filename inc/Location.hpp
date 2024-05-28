@@ -31,13 +31,13 @@ class Location
 		void	setReturn(std::string ret);
 		void	setCompiler(std::string comp);
 
-		std::string	getLocation();
-		std::string	getRoot();
-		bool		getAutoIndex();
-		std::string	getIndex();
-		std::vector<std::string>	getMethods();
-		std::string	getReturn();
-		std::string getCompiler();
+		std::string	getLocation() const;
+		std::string	getRoot() const;
+		bool		getAutoIndex() const;
+		std::string	getIndex() const;
+		std::vector<std::string>	getMethods() const;
+		std::string	getReturn() const;
+		std::string getCompiler() const;
 
 		void	clear();
 		bool	isComplet();

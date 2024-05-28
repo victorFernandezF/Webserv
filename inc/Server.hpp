@@ -39,17 +39,17 @@ class Server
 		void	setFD(int fd);
 		void	addLocation(Location location);
 
-		std::string	getHost();
-		std::vector<std::string> const	&getListen();
+		std::string	getHost() const;
+		std::vector<std::string> const	&getListen() const;
 		bool	isSetListen();
-		std::string getServerName();
-		unsigned int	getClientBSize();
+		std::string getServerName() const;
+		unsigned int	getClientBSize() const;
 		bool	isSetClientBSize();
-		std::string	getUploadPath();
+		std::string	getUploadPath() const;
 		std::map<unsigned short, std::string> getErrorPage(unsigned short nError);
-		std::map<unsigned short, std::string> getErrorPageMap();
-		std::vector<int> const	&getFD();
-		std::vector<Location>	getLocations();
+		std::map<unsigned short, std::string> getErrorPageMap() const;
+		std::vector<int> const	&getFD() const;
+		std::vector<Location>	getLocations() const;
 
 		void	clear();
 };

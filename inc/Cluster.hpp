@@ -21,6 +21,7 @@
 
 # include "Server.hpp"
 # include "Request.hpp"
+# include "Response.hpp"
 # include "ft_utils.hpp"
 
 # define MAXCLIENT 20

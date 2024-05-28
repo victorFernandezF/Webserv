@@ -221,6 +221,7 @@ void	Cluster::runServers()
 				}
 				if (_pollFDs[i].revents & POLLOUT && !_isServerFD(_pollFDs[i].fd))
 				{
+					std::cout << Response(_requests[_pollFDs[i].fd], _clients[_pollFDs[i].fd], _pollFDs[i].fd) << std::endl;
 					_response(i, pollSize, _pollFDs[i]);
 				}
 			}
