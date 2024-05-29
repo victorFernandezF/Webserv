@@ -93,6 +93,20 @@ Cluster	&Cluster::operator=(Cluster const &rhs)
 /*                           NON MEMBER FUNCTIONS                             */
 /* ************************************************************************** */
 
+
+/* ************************************************************************** */
+/*                             MEMBER FUNCTIONS                               */
+/* ************************************************************************** */
+
+void	Cluster::addServer(Server srv)
+{
+	this->_servers.push_back(srv);
+}
+
+/* ************************************************************************** */
+/*                             GETTERS / SETTERS                              */
+/* ************************************************************************** */
+
 void	Cluster::_startListen()
 {
 	for (std::vector<Server>::iterator srv = _servers.begin(); srv != _servers.end(); srv++)
@@ -222,7 +236,8 @@ void	Cluster::runServers()
 				if (_pollFDs[i].revents & POLLOUT && !_isServerFD(_pollFDs[i].fd))
 				{
 					std::cout << Response(_requests[_pollFDs[i].fd], _clients[_pollFDs[i].fd], _pollFDs[i].fd) << std::endl;
-					_response(i, pollSize, _pollFDs[i]);
+					//_response(_pollFDs[i]);
+					_closeClient(i, pollSize, _pollFDs[i]);
 				}
 			}
 		}
@@ -240,6 +255,17 @@ void	Cluster::_closeFDs()
 			close(*fd);
 		}
 	}
+}
+
+void	Cluster::_closeClient(size_t &i, size_t &pollSize, pollfd &client)
+{
+	std::cout << "Cerrando transmision con cliente " << client.fd << std::endl;
+	close(client.fd);
+	_clients.erase(client.fd);
+	this->_pollFDs.erase(_pollFDs.begin() + i);
+	_requests.erase(_pollFDs[i].fd);
+	i--;
+	pollSize--;
 }
 
 bool	Cluster::_isServerFD(int fdIn)
@@ -319,7 +345,7 @@ void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *s
 	}
 }
 
-void	Cluster::_response(size_t &i, size_t &pollSize, pollfd &client)
+void	Cluster::_response(pollfd &client)
 {
 	std::string toResponse = _makeResponse();
 	const char *msg = toResponse.c_str();
@@ -343,13 +369,13 @@ void	Cluster::_response(size_t &i, size_t &pollSize, pollfd &client)
 		std::cerr << "Sent partial message to client socket " << client.fd << ": " << bytes_sent
 		<< " bytes sent" << std::endl;
 	}
-	std::cout << "Cerrando transmision con cliente " << client.fd << std::endl;
+	/*std::cout << "Cerrando transmision con cliente " << client.fd << std::endl;
 	close(client.fd);
 	_clients.erase(client.fd);
 	this->_pollFDs.erase(_pollFDs.begin() + i);
 	_requests.erase(_pollFDs[i].fd);
 	i--;
-	pollSize--;
+	pollSize--;*/
 }
 
 std::string	Cluster::_makeResponse()
@@ -384,19 +410,6 @@ std::string	Cluster::_makeResponse()
 
 	return (header);
 }
-
-/* ************************************************************************** */
-/*                             MEMBER FUNCTIONS                               */
-/* ************************************************************************** */
-
-void	Cluster::addServer(Server srv)
-{
-	this->_servers.push_back(srv);
-}
-
-/* ************************************************************************** */
-/*                             GETTERS / SETTERS                              */
-/* ************************************************************************** */
 
 std::vector<Server>	Cluster::getServers() const
 {

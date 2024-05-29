@@ -44,8 +44,9 @@ class Cluster
 		Server	*_getServerbyFD(int fd);
 		void	_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *server);
 
-		void	_response(size_t &i, size_t &pollSize, pollfd &client);
+		void	_response(pollfd &client);
 		std::string	_makeResponse();
+		void	_closeClient(size_t &i, size_t &pollSize, pollfd &client);
 
 	public:
 		Cluster();

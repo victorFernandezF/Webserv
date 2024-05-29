@@ -101,21 +101,6 @@ Location	&Location::operator=(Location const &rhs)
 /*                           NON MEMBER FUNCTIONS                             */
 /* ************************************************************************** */
 
-bool	Location::_checkDup(std::vector<std::string> methods)
-{
-	for (std::vector<std::string>::iterator it = methods.begin(); it != methods.end(); it++)
-	{
-		for (std::vector<std::string>::iterator jt = methods.begin(); jt != methods.end(); jt++)
-	{
-		if (it != jt)
-		{
-			if (*it == *jt)
-				return (true);
-		}
-	}
-	}
-	return (false);
-}
 
 /* ************************************************************************** */
 /*                             MEMBER FUNCTIONS                               */
@@ -134,11 +119,27 @@ void	Location::clear()
 
 bool	Location::isComplet()
 {
-	if ((!(this->_return.empty()) && !(this->_location.empty()))
+	if (this->_methods.empty()
+		|| ((!(this->_return.empty()) && !(this->_location.empty()))
 		|| (!(this->_location.empty()) && !(this->_root.empty())
-		&& (!(this->_index.empty()) || this->_autoindex == true || !(this->_compiler.empty()))
-		&& !(this->_methods.empty())))
+		&& (!(this->_index.empty()) || this->_autoindex == true || !(this->_compiler.empty())))))
 		return (true);
+	return (false);
+}
+
+bool	Location::_checkDup(std::vector<std::string> methods)
+{
+	for (std::vector<std::string>::iterator it = methods.begin(); it != methods.end(); it++)
+	{
+		for (std::vector<std::string>::iterator jt = methods.begin(); jt != methods.end(); jt++)
+	{
+		if (it != jt)
+		{
+			if (*it == *jt)
+				return (true);
+		}
+	}
+	}
 	return (false);
 }
 

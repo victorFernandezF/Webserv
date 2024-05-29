@@ -199,7 +199,7 @@ class	Config::errorInCompletLocationSrv : public std::exception
 	public:
 		virtual const char *what(void) const throw()
 		{
-			return ("Error: need add basic \"location\" params\nreturn value\nor\nroot, index and methods params\n");
+			return ("Error: need add basic \"location\" params: allow methods and \nreturn value\nor\nroot and index");
 		}
 };
 
@@ -320,6 +320,11 @@ Config	&Config::operator=(Config const &rhs)
 /*                           NON MEMBER FUNCTIONS                             */
 /* ************************************************************************** */
 
+
+/* ************************************************************************** */
+/*                             MEMBER FUNCTIONS                               */
+/* ************************************************************************** */
+
 void	Config::_fillCLines()
 {
 	std::ifstream	conf(this->_file.c_str());
@@ -330,7 +335,7 @@ void	Config::_fillCLines()
 		throw errorOpen();
 	while (getline(conf, line))
 	{
-		if (_isEmptyLine(line))
+		if (_isEmptyLine(line) || line[0] == '#')
 			continue;
 		if (line.find('#' != std::string::npos))
 		{
@@ -881,12 +886,6 @@ void	Config::_printServers()
 		nbrs++;
 	}
 }
-
-/* ************************************************************************** */
-/*                             MEMBER FUNCTIONS                               */
-/* ************************************************************************** */
-
-
 
 /* ************************************************************************** */
 /*                             GETTERS / SETTERS                              */

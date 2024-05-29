@@ -144,10 +144,6 @@ void	Request::_setHeaderParams(std::string header)
 	}
 }
 
-/*void	Request::_body(std::string str)
-{
-	(void)str;
-}*/
 
 /* ************************************************************************** */
 /*                             GETTERS / SETTERS                              */
