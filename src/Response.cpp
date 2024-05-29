@@ -137,7 +137,7 @@ std::string _makeResponseTest()
 	header += "\r\n";
 	header += "Connection: close";
 	header += "\r\n";
-	header += "Content-Type: text/html; charset=utf-8";
+	header += "Content-Type: text/html";//; charset=utf-8";
 	header += "\r\n";
 	header += "Content-Length: ";
 	header += ft_itoa(body.size());
@@ -153,13 +153,21 @@ std::string _makeResponseTest()
 
 void	Response::_getMethodTemp()
 {
-	
+	std::string	resp;
+
+	if (_loc.getAutoIndex())
+	{
+		return ;
+	}
+	else
+	{
+		return ;
+	}
 }
 
 void	Response::_getMethod()
 {
 	_sendResponse(_makeResponseTest());
-
 }
 
 void	Response::_postMethod()
@@ -212,6 +220,26 @@ bool	Response::_isAllowedMethod()
 			return (true);
 	}
 	return (false);
+}
+
+std::string	Response::_parsePathIndex()
+{
+	std::string ret;
+
+	ret += _loc.getRoot();
+	if (ret[ret.size() -1] != '/')
+		ret += '/';
+	ret += _loc.getIndex();
+
+	return (ret);
+}
+
+std::string	Response::_getFile(std::string name)
+{
+	std::string ret;
+	(void)name;
+
+	return (ret);
 }
 
 std::string	Response::_getErrorPage(unsigned short nbr)

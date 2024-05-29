@@ -52,6 +52,8 @@ class Response
 
 			bool	_isLocation(std::string loc);
 			bool	_isAllowedMethod();
+			std::string _parsePathIndex();
+			std::string _getFile(std::string name);
 
 			void	_getMethodTemp();
 
