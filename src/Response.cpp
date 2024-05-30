@@ -63,6 +63,8 @@ Response	&Response::operator=(Response const &rhs)
 /*                             MEMBER FUNCTIONS                               */
 /* ************************************************************************** */
 
+std::string _makeReponseTestRedirect();
+
 void	Response::_exeResponse()
 {
 	if (_isLocation(_req.getPath()))
@@ -70,7 +72,10 @@ void	Response::_exeResponse()
 		if (_isAllowedMethod())
 		{
 			if (_req.getMethod() == "GET")
-				_getMethod();
+			{
+				//_sendResponse(_makeReponseTestRedirect());
+				_getMethodTemp();
+			}
 			else if (_req.getMethod() == "POST")
 				_postMethod();
 			else if (_req.getMethod() == "DELETE")
@@ -96,7 +101,7 @@ std::string	Response::_makeResponse(std::string body)
 	ret += "\r\n";
 	ret += "Connection: close";
 	ret += "\r\n";
-	ret += "Content-Type: text/html; charset=utf-8";
+	ret += "Content-Type: text/html"; //Crear función para rellenar Content-Type
 	ret += "\r\n";
 	ret += "Content-Length: ";
 	ret += ft_itoa(body.size());
@@ -118,6 +123,29 @@ void	Response::_sendResponse(std::string msg)
 	(void)bytes_sent;
 }
 
+std::string _makeReponseTestRedirect()
+{
+	std::string		header;
+	std::string 	body;
+
+	header += "HTTP/1.1 301 MOVED PERMANENTRLY";
+	header += "\r\n";
+	header += "Connection: close";
+	header += "\r\n";
+	//header += "Content-Type: text/html";//; charset=utf-8"; 
+	//header += "\r\n";
+	header += "Location: https://www.google.es";
+	header += "\r\n";
+	header += "Content-Length: ";
+	header += ft_itoa(body.size());
+	header += "\r\n";
+	header += "\r\n";
+	header += body;
+	header += "\r\n\r\n";
+
+	return (header);
+}
+
 std::string _makeResponseTest()
 {
 	std::ifstream	file("./root/index.html");
@@ -137,7 +165,7 @@ std::string _makeResponseTest()
 	header += "\r\n";
 	header += "Connection: close";
 	header += "\r\n";
-	header += "Content-Type: text/html";//; charset=utf-8";
+	header += "Content-Type: text/html";
 	header += "\r\n";
 	header += "Content-Length: ";
 	header += ft_itoa(body.size());
@@ -157,20 +185,22 @@ void	Response::_getMethodTemp()
 
 	if (_loc.getAutoIndex())
 	{
+		//Función de listado de ficheros, si procede, y construcción de html correspondiente
 		return ;
 	}
 	else
 	{
+		_sendResponse(_makeResponse(_getFile(_parsePathUrl())));
 		return ;
 	}
 }
 
-bool	Response::_isPathAFile(Request req)
+/*bool	Response::_isPathAFile(Request req)
 {
 	size_t dot = req.getPath().find(".");
 	
-	if (dot == std::npos){
-		if ( dot == req.getPath().length - 1)
+	if (dot == std::string::npos){
+		if ( dot == req.getPath().size() - 1)
 			return false;
 	}
 	return true; 
@@ -181,7 +211,7 @@ void Response::_isPathAccessible(Request req)
 	std::string path = req.getPath();
 	if (access(path.c_str(), F_OK) != 0)
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_METHOD_NOT_ALLOWED)));
-}
+}*/
 
 void	Response::_getMethod()
 {
@@ -209,28 +239,23 @@ bool	Response::_isLocation(std::string loc)
 			_loc = *it;
 			return (true);
 		}
+		if (loc.find(it->getLocation()) != std::string::npos
+			&& ft_isBeginStr(loc, it->getLocation())
+			&& (it->getLocation().size() == 1 || loc[it->getLocation().size()] == '/'))
+		{
+			_loc = *it;
+			return (true);
+		}
+		else
+		{
+			return (false);
+		}
 	}
 	return (false);
 }
 
 bool	Response::_isAllowedMethod()
 {
-	/*std::vector<Location> paths = _srv.getLocations();
-
-	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
-	{
-		if (it->getLocation() == loc)
-		{
-			std::vector<std::string> mths = it->getMethods();
-			for (std::vector<std::string>::iterator mt = mths.begin(); mt != mths.end(); mt++)
-			{
-				if (*mt == _req.getMethod())
-					return (true);
-			}
-		}
-	}
-	return (false);*/
-
 	std::vector<std::string> mths = _loc.getMethods();
 	for (std::vector<std::string>::iterator mt = mths.begin(); mt != mths.end(); mt++)
 	{
@@ -238,6 +263,32 @@ bool	Response::_isAllowedMethod()
 			return (true);
 	}
 	return (false);
+}
+
+std::string	Response::_makeResponseRedirect()
+{
+	//construir a parte de _makeReponseTestRedirect(), insertándole _loc.getReturn()
+	// en la etiqueta Location
+
+	return ("");
+}
+
+std::string Response::_parsePathUrl()
+{	
+	std::string	tmp;
+
+	if (_loc.getLocation() == _req.getPath())
+	{
+		return (_parsePathIndex());
+	}
+	else
+	{
+		tmp = _loc.getRoot();
+		if (tmp[tmp.size() - 1] == '/' && _req.getPath()[0] == '/')
+			tmp.erase(tmp[tmp.size() - 1], 1);
+		return (tmp + _req.getPath());
+	}
+	
 }
 
 std::string	Response::_parsePathIndex()
@@ -254,8 +305,18 @@ std::string	Response::_parsePathIndex()
 
 std::string	Response::_getFile(std::string name)
 {
-	std::string ret;
-	(void)name;
+	std::ifstream	file(name.c_str());
+	std::string 	ret;
+	std::string 	line;
+
+	if (!file.is_open())
+		return (_getErrorPage(HTTP_NOT_FOUND));
+
+	while (getline(file, line))
+	{
+		ret += line;
+		ret += '\n';
+	}
 
 	return (ret);
 }
@@ -294,7 +355,6 @@ std::string	Response::_getErrorPage(unsigned short nbr)
 
 std::string	Response::_makeErrorPage(unsigned short nbr)
 {
-	(void)nbr;
 	std::string ret;
 
 	ret += _makeHtmlHead("Error");

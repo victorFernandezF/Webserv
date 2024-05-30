@@ -36,8 +36,8 @@ class Response
 
 			void	_exeResponse();
 
-			bool	Response::_isPathAFile(Request req);
-			void Response::isPathAccessible(Request req) 
+			bool	_isPathAFile(Request req);
+			void	_isPathAccessible(Request req); 
 
 			std::string	_getErrorPage(unsigned short nbr);
 			std::string	_makeErrorPage(unsigned short nrb);
@@ -47,6 +47,7 @@ class Response
 			std::string	_getCodePageText(unsigned short nbr);
 
 			std::string	_makeResponse(std::string body);
+			std::string _makeResponseRedirect();
 			void	_sendResponse(std::string msg);
 
 			void	_getMethod();
@@ -56,6 +57,7 @@ class Response
 			bool	_isLocation(std::string loc);
 			bool	_isAllowedMethod();
 			std::string _parsePathIndex();
+			std::string	_parsePathUrl();
 			std::string _getFile(std::string name);
 
 			void	_getMethodTemp();
