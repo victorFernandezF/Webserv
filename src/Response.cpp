@@ -165,6 +165,24 @@ void	Response::_getMethodTemp()
 	}
 }
 
+bool	Response::_isPathAFile(Request req)
+{
+	size_t dot = req.getPath().find(".");
+	
+	if (dot == std::npos){
+		if ( dot == req.getPath().length - 1)
+			return false;
+	}
+	return true; 
+}
+
+void Response::_isPathAccessible(Request req) 
+{
+	std::string path = req.getPath();
+	if (access(path.c_str(), F_OK) != 0)
+		_sendResponse(_makeResponse(_getErrorPage(HTTP_METHOD_NOT_ALLOWED)));
+}
+
 void	Response::_getMethod()
 {
 	_sendResponse(_makeResponseTest());

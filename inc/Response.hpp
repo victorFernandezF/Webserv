@@ -36,6 +36,9 @@ class Response
 
 			void	_exeResponse();
 
+			bool	Response::_isPathAFile(Request req);
+			void Response::isPathAccessible(Request req) 
+
 			std::string	_getErrorPage(unsigned short nbr);
 			std::string	_makeErrorPage(unsigned short nrb);
 			std::string	_makeHtmlHead(std::string title);
