@@ -185,6 +185,7 @@ void	Response::_getMethodTemp()
 
 	if (_loc.getAutoIndex())
 	{
+		std::string html = _autoindex();
 		//Función de listado de ficheros, si procede, y construcción de html correspondiente
 		return ;
 	}
@@ -195,7 +196,36 @@ void	Response::_getMethodTemp()
 	}
 }
 
-/*bool	Response::_isPathAFile(Request req)
+std::string _autoindex(Request req){
+	std::string html = "";
+	std::string path = req.getPath();
+	html = "<!DOCTYPE html>\n<html>\n<head>\n";
+    html += "<title>Autoindex</title>\n";
+    html += "</head>\n<body>\n";
+    html += "<h1>Contenido del directorio:</h1>\n";
+    html += "<ul>\n";
+ 	
+	DIR* directory = opendir(path.c_str());
+	if (!_isPathAFile(req)) {
+        struct dirent* entry;
+        while ((entry = readdir(directory)) != nullptr) {
+            std::string name = entry->d_name;
+            if (name != "." && name != "..") {
+				if (entry->d_type == DT_REG) {
+                      html += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
+                } else if (entry->d_type == DT_DIR) {
+                      html += "<li><a href=\"" + name + "/\">" + name + "</a></li>\n";
+                }
+            }
+        }
+		html += "</ul>\n";
+		html += "</body>\n</html>\n";
+    } 
+
+	return (html);
+}
+
+bool	Response::_isPathAFile(Request req)
 {
 	size_t dot = req.getPath().find(".");
 	
@@ -206,6 +236,7 @@ void	Response::_getMethodTemp()
 	return true; 
 }
 
+/*
 void Response::_isPathAccessible(Request req) 
 {
 	std::string path = req.getPath();

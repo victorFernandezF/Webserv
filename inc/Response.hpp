@@ -7,6 +7,7 @@
 # include <sys/socket.h>
 
 # include <Server.hpp>
+# include <dirent.h>
 # include <Request.hpp>
 
 # include <ft_utils.hpp>
@@ -38,6 +39,7 @@ class Response
 
 			bool	_isPathAFile(Request req);
 			void	_isPathAccessible(Request req); 
+			std::string _autoindex(Request req);
 
 			std::string	_getErrorPage(unsigned short nbr);
 			std::string	_makeErrorPage(unsigned short nrb);
