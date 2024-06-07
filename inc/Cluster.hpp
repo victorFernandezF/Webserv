@@ -16,6 +16,7 @@
 # include <sys/types.h>
 # include <fcntl.h>
 # include <poll.h>
+# include <ctime>
 
 # include <cerrno>
 
@@ -35,6 +36,7 @@ class Cluster
 		std::map<int, Server *>	_clients;
 		std::map<int, Request> _requests;
 		std::map<int, std::string>	_tmpRecv;
+		std::map<int, std::clock_t> _timeOuts;
 
 		void	_startListen();
 		int		_startSocket(Server &server, std::string port);

@@ -190,21 +190,30 @@ void	Cluster::runServers()
 			//Si error cerrar sockets y lanzar exepcion
 			for (std::vector<pollfd>::iterator pollFDs = _pollFDs.begin(); pollFDs != _pollFDs.end(); pollFDs++)
 			{
-				std::cout << "(poll -1) Cerrando FD " << pollFDs->fd << std::endl;
 				close(pollFDs->fd);
 			}
 			throw errorPolling();
 		}
 		else
 		{
-			if (status == 0)
+			/*if (status == 0)
 			{
 			//si devulve 0, poll correcto pero sin cambios
 			std::cout << "Esperando conexiones..." << std::endl;
 			continue ;
-			}
+			}*/
 			for (size_t i = 0; i < pollSize; i++)
 			{
+				if (( std::clock() - _timeOuts[_pollFDs[i].fd] ) / (double)(CLOCKS_PER_SEC * 1000) > 500)
+				{
+					std::cout << "Time out fd " << _pollFDs[i].fd << std::endl;
+					close(_pollFDs[i].fd);
+					_clients.erase(_pollFDs[i].fd);
+					_tmpRecv[_pollFDs[i].fd].erase();
+					this->_pollFDs.erase(_pollFDs.begin() + i);
+					i--;
+					pollSize--;
+				}
 				if (_pollFDs[i].revents & POLLIN)
 				{
 					if (_isServerFD(_pollFDs[i].fd) && pollSize < MAXCLIENT)
@@ -219,6 +228,7 @@ void	Cluster::runServers()
 							continue ;
 						}
 						std::cout << "Cliente conectado en fd: " << tmpFD << std::endl;
+						_timeOuts[tmpFD] = std::clock();
 						_tmpRecv[tmpFD] = "";
 						_clients[tmpFD] = _getServerbyFD(_pollFDs[i].fd);
 						_pollFDs.push_back(_makeClientPoll(tmpFD));
@@ -235,7 +245,12 @@ void	Cluster::runServers()
 						if (status == -1)
 						{
 							close(_pollFDs[i].fd);
+							_clients.erase(_pollFDs[i].fd);
 							_tmpRecv[_pollFDs[i].fd].erase();
+							this->_pollFDs.erase(_pollFDs.begin() + i);
+							i--;
+							pollSize--;
+							//_timeOuts[_pollFDs[i].fd].erase();
 						}
 						else if (status == 1)
 						{
@@ -351,7 +366,7 @@ pollfd	Cluster::_makeClientPoll(int fd)
 			std::cout << Request(_tmpRecv[client.fd], client.fd, *server) << std::endl;
  			return ;
 		}
-		/*if (_isCompleteRequest(tmp))
+		if (_isCompleteRequest(tmp))
 		{
 			std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
 			tmp.insert(tmp.end(), '\0', 1);
@@ -369,6 +384,8 @@ pollfd	Cluster::_makeClientPoll(int fd)
 
 int	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *server)
 {
+	(void)pollSize;
+	(void)i;
 	std::cout << "Recibiendo datos de cliente en fd: " << client.fd << ", de servidor: "
 	<< server->getServerName() << std::endl;
 
@@ -383,25 +400,28 @@ int	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *se
 	}
 	if (reads == -1)
 	{
-		close(client.fd);
-		_clients.erase(client.fd);
-		this->_pollFDs.erase(_pollFDs.begin() + i);
-		i--;
-		pollSize--;
+		//close(client.fd);
+		//_clients.erase(client.fd);
+		//this->_pollFDs.erase(_pollFDs.begin() + i);
+		//i--;
+		//pollSize--;
 		std::cout << "Error reading from client" << std::endl;
 		return (-1);
 	}
 	else
 	{
 		Request tmp(_tmpRecv[client.fd], client.fd, *server);
-		if (tmp.areHeader() && )
-		std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
+		if (tmp.areHeader() && tmp.areBody())
+		{
+		/*std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
 		_tmpRecv[client.fd].insert(_tmpRecv[client.fd].end(), '\0', 1);
 		client.events = POLLOUT;
 		_requests[client.fd] = Request(_tmpRecv[client.fd], client.fd, *server);
-		std::cout << Request(_tmpRecv[client.fd], client.fd, *server) << std::endl;
-		return (1);
+		std::cout << Request(_tmpRecv[client.fd], client.fd, *server) << std::endl;*/
+			return (1);
+		}
 	}
+	return (0);
 	/*if (_isCompleteRequest(tmp))
 	{
 		std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;

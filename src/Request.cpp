@@ -199,9 +199,19 @@ bool	Request::areHeader()
 
 bool	Request::areBody()
 {
-	if (this->getContentType() == "multipart/form-data")
+	std::map<std::string, std::string> tmp = this->_headerParams;
+
+	if (tmp.find("Content-Type") != tmp.end())
 	{
-		
+		if (this->getContentLength() == this->_body.size())
+		{
+			return (true);
+		}
+		return (false);
+	}
+	else
+	{
+		return (true);
 	}
 }
 
