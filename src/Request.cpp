@@ -17,6 +17,7 @@ Request::Request()
 
 Request::Request(std::string req)
 {
+	this->_isHeader = false;
 	_parseRequest(req);
 }
 
@@ -24,6 +25,7 @@ Request::Request(std::string req, int fd, Server srv)
 {
 	this->_clientFD = fd;
 	this->_Server = srv;
+	this->_isHeader = false;
 	_parseRequest(req);
 }
 
@@ -37,6 +39,7 @@ Request::Request(Request const &src)
 	this->_header = src._header;
 	this->_body = src._body;
 	this->_headerParams = src._headerParams;
+	this->_isHeader = src._isHeader;
 	return ;
 }
 
@@ -61,6 +64,7 @@ Request	&Request::operator=(Request const &rhs)
 		this->_header = rhs._header;
 		this->_body = rhs._body;
 		this->_headerParams = rhs._headerParams;
+		this->_isHeader = rhs._isHeader;
 	}
 	return (*this);
 }
@@ -147,6 +151,10 @@ void	Request::_setHeaderParams(std::string header)
 			this->_headerParams[tmp.substr(0, pos)] = tmp.substr(pos + 2);
 		}
 	}
+	if (!this->_headerParams.empty())
+	{
+		this->_isHeader = true;
+	}
 }
 
 
@@ -182,6 +190,19 @@ std::string	Request::getBody() const
 std::map<std::string, std::string>	Request::getHeaderParams() const
 {
 	return (this->_headerParams);
+}
+
+bool	Request::areHeader()
+{
+	return (this->_isHeader);
+}
+
+bool	Request::areBody()
+{
+	if (this->getContentType() == "multipart/form-data")
+	{
+		
+	}
 }
 
 size_t	Request::getContentLength()

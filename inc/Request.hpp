@@ -22,6 +22,7 @@ class Request
 		std::string		_header;
 		std::string		_body;
 		std::map<std::string, std::string>	_headerParams;
+		bool			_isHeader;
 
 		void	_parseRequest(std::string req);
 		void	_firstLine(std::string str);
@@ -48,6 +49,8 @@ class Request
 		std::string getBody() const;
 		std::string getHeader() const;
 		std::map<std::string, std::string>	getHeaderParams() const;
+		bool	areHeader();
+		bool	areBody();
 		size_t	getContentLength();
 		std::string getContentType() const;
 		std::string getBoundary() const;

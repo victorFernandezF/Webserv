@@ -137,7 +137,7 @@ int		Cluster::_startSocket(Server &server, std::string port)
 	status = listen(fd, MAXCLIENT);				//Escucha en el fd del socket con cola de 20
 	if (status != 0)
 		throw errorListenSocket();
-	status = fcntl(fd, F_SETFL, O_NONBLOCK);	//Establece el fd obejetivo en no bloqueante
+	status = fcntl(fd, F_SETFL, O_NONBLOCK);	//Establece el fd objetivo en no bloqueante
 	if (status != 0)
 		throw errorNonBlockFD();
 	return (fd);
@@ -230,7 +230,18 @@ void	Cluster::runServers()
 					else if (!_isServerFD(_pollFDs[i].fd) && pollSize < MAXCLIENT)
 					{
 						//Si no es el socket servidor, es un socket cliente, leer
-						_readClient(i, pollSize, _pollFDs[i], _clients[_pollFDs[i].fd]);
+						//_readClient(i, pollSize, _pollFDs[i], _clients[_pollFDs[i].fd]);
+						status = _readClient(i, pollSize, _pollFDs[i], _clients[_pollFDs[i].fd]);
+						if (status == -1)
+						{
+							close(_pollFDs[i].fd);
+							_tmpRecv[_pollFDs[i].fd].erase();
+						}
+						else if (status == 1)
+						{
+							_pollFDs[i].events = POLLOUT;
+							_requests[_pollFDs[i].fd] = Request(_tmpRecv[_pollFDs[i].fd], _pollFDs[i].fd, *_clients[_pollFDs[i].fd]);
+						}
 					}
 				}
 				if (_pollFDs[i].revents & POLLOUT && !_isServerFD(_pollFDs[i].fd))
@@ -306,7 +317,7 @@ pollfd	Cluster::_makeClientPoll(int fd)
 	return (pollFd);
 }
 
-void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *server)
+/*void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *server)
 {
 	std::cout << "Recibiendo datos de cliente en fd: " << client.fd << ", de servidor: "
 	<< server->getServerName() << std::endl;
@@ -314,13 +325,13 @@ void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *s
 	char		buff[BUFFSIZE];
 	//std::string	tmp;
 	int			reads = 0;
-//	size_t		loop = 0;
+	size_t		loop = 0;
 
-//	while (1)
-//	{
-//		loop++;
+	while (1)
+	{
+		loop++;
 		reads = recv(client.fd, buff, BUFFSIZE, 0);
-		if (reads == -1)// && loop == 1)
+		if (reads == -1 && loop == 1)
 		{
 			close(client.fd);
 			_clients.erase(client.fd);
@@ -330,7 +341,7 @@ void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *s
 			std::cout << "Error reading from client" << std::endl;
 			return ;
 		}
-		if (_isCompleteRequest(_tmpRecv[client.fd]))//(!(reads >= 0))
+		if (!(reads >= 0))
 		{
 			std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
 			std::cout << "Última linea: " << std::endl << "~~~~~~~~~~~" << buff << std::endl << "~~~~~~~~~~~" << std::endl;
@@ -348,12 +359,58 @@ void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *s
 			_requests[client.fd] = Request(tmp, client.fd, *server);
 			std::cout << Request(tmp, client.fd, *server) << std::endl;
 			return ;
-		}*/
+		}
 		else
 		{
 			_tmpRecv[client.fd].insert(_tmpRecv[client.fd].end(), buff, buff + reads);
 		}
-//	}
+	}
+}*/
+
+int	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *server)
+{
+	std::cout << "Recibiendo datos de cliente en fd: " << client.fd << ", de servidor: "
+	<< server->getServerName() << std::endl;
+
+	char		buff[BUFFSIZE];
+	int			reads = 0;
+
+	reads = recv(client.fd, buff, BUFFSIZE, 0);
+	if (reads > 0)
+	{
+		_tmpRecv[client.fd].insert(_tmpRecv[client.fd].end(), buff, buff + reads);
+		return (0);
+	}
+	if (reads == -1)
+	{
+		close(client.fd);
+		_clients.erase(client.fd);
+		this->_pollFDs.erase(_pollFDs.begin() + i);
+		i--;
+		pollSize--;
+		std::cout << "Error reading from client" << std::endl;
+		return (-1);
+	}
+	else
+	{
+		Request tmp(_tmpRecv[client.fd], client.fd, *server);
+		if (tmp.areHeader() && )
+		std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
+		_tmpRecv[client.fd].insert(_tmpRecv[client.fd].end(), '\0', 1);
+		client.events = POLLOUT;
+		_requests[client.fd] = Request(_tmpRecv[client.fd], client.fd, *server);
+		std::cout << Request(_tmpRecv[client.fd], client.fd, *server) << std::endl;
+		return (1);
+	}
+	/*if (_isCompleteRequest(tmp))
+	{
+		std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
+		tmp.insert(tmp.end(), '\0', 1);
+		client.events = POLLOUT;
+		_requests[client.fd] = Request(tmp, client.fd, *server);
+		std::cout << Request(tmp, client.fd, *server) << std::endl;
+		return ;
+	}*/
 }
 
 bool	Cluster::_isCompleteRequest(std::string req)
@@ -361,7 +418,10 @@ bool	Cluster::_isCompleteRequest(std::string req)
 	Request tmp(req);
 	
 	if (tmp.getMethod() == "GET")
-		return (true);
+	{
+		if (tmp.areHeader())
+			return (true);
+	}
 
 	if (tmp.getMethod() == "POST" && tmp.getContentLength() == tmp.getBody().size())
 	{
