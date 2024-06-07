@@ -8,6 +8,7 @@
 # include <sstream>
 
 # include <Server.hpp>
+# include <ft_utils.hpp>
 
 class Request
 {
@@ -35,6 +36,7 @@ class Request
 
 	public:
 		Request();
+		Request(std::string req);
 		Request(std::string req, int fd, Server srv);
 		Request(Request const &src);
 		Request &operator=(Request const &rhs);
@@ -46,6 +48,9 @@ class Request
 		std::string getBody() const;
 		std::string getHeader() const;
 		std::map<std::string, std::string>	getHeaderParams() const;
+		size_t	getContentLength();
+		std::string getContentType() const;
+		std::string getBoundary() const;
 };
 
 std::ostream	&operator<<(std::ostream &o, Request const &i);

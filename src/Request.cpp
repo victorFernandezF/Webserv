@@ -15,6 +15,11 @@ Request::Request()
 	return ;
 }
 
+Request::Request(std::string req)
+{
+	_parseRequest(req);
+}
+
 Request::Request(std::string req, int fd, Server srv)
 {
 	this->_clientFD = fd;
@@ -177,6 +182,60 @@ std::string	Request::getBody() const
 std::map<std::string, std::string>	Request::getHeaderParams() const
 {
 	return (this->_headerParams);
+}
+
+size_t	Request::getContentLength()
+{
+	std::map<std::string, std::string> tmp = this->_headerParams;
+
+	return (ft_atoiUnInt(tmp["Content-Length"]));
+}
+
+std::string Request::getContentType() const
+{
+	std::map<std::string, std::string> tmp = this->_headerParams;
+	std::string ret;
+	size_t		pos;
+
+	if (tmp.find("Content-Type") != tmp.end())
+	{
+		ret = tmp["Content-Type"];
+		if (ret.find(';') != std::string::npos)
+		{
+			pos = ret.find(';');
+			ret = ret.substr(0, pos);
+		}
+		return (ret);
+	}
+	return (ret);
+}
+
+std::string Request::getBoundary() const
+{
+	std::map<std::string, std::string> hParams = this->_headerParams;
+	std::string ret;
+	std::string	tmp;
+	size_t		pos;
+
+	if (hParams.find("Content-Type") != hParams.end())
+	{
+		tmp = hParams["Content-Type"];
+		if (tmp.find("boundary") != std::string::npos)
+		{
+			pos = tmp.find(';');
+			tmp = tmp.substr(pos + 2);
+			if (tmp.find(';') != std::string::npos)
+			{
+				pos = tmp.find(';');
+				tmp = tmp.substr(0, pos);
+			}
+			pos = tmp.find("=");
+			ret = tmp.substr(pos + 1);
+			return (ret);
+		}
+		return (ret);
+	}
+	return (ret);
 }
 
 void	Request::_setPath(std::string path)

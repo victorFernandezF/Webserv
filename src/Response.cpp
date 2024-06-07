@@ -185,7 +185,7 @@ void	Response::_getMethodTemp()
 
 	if (_loc.getAutoIndex())
 	{
-		std::string html = _autoindex();
+//		std::string html = _autoindex();
 		//Función de listado de ficheros, si procede, y construcción de html correspondiente
 		return ;
 	}
@@ -196,7 +196,7 @@ void	Response::_getMethodTemp()
 	}
 }
 
-std::string _autoindex(Request req){
+/*std::string Response::_autoindex(Request req){
 	std::string html = "";
 	std::string path = req.getPath();
 	html = "<!DOCTYPE html>\n<html>\n<head>\n";
@@ -223,7 +223,7 @@ std::string _autoindex(Request req){
     } 
 
 	return (html);
-}
+}*/
 
 bool	Response::_isPathAFile(Request req)
 {
@@ -489,7 +489,10 @@ std::ostream	&operator<<(std::ostream &o, Response const &i)
 	std::cout << std::endl << "En Response:" << std::endl << std::endl;
 	std::cout << "Cliente: " << i.getClientFD() << std::endl;
 	std::cout << i.getRequest() << std::endl;
-	std::cout << i.getServer() << std::endl;
+	/*std::cout << std::endl << "/////////////////" << std::endl;
+	std::cout << "ContentType = " << i.getRequest().getContentType() << std::endl;
+	std::cout << "Boundry = " << i.getRequest().getBoundary() << std::endl << "/////////////////" << std::endl;*/
+	//std::cout << i.getServer() << std::endl;
 	std::cout << "*******************************************************" << std::endl;
 	return (o);
 }

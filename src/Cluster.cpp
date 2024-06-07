@@ -1,7 +1,7 @@
 #include "Cluster.hpp"
 
 /* ************************************************************************** */
-/*                             MEMBER EXCEPTIONS                               */
+/*                             MEMBER EXCEPTIONS                              */
 /* ************************************************************************** */
 
 class	Cluster::errorParseListenPort : public std::exception
@@ -103,10 +103,6 @@ void	Cluster::addServer(Server srv)
 	this->_servers.push_back(srv);
 }
 
-/* ************************************************************************** */
-/*                             GETTERS / SETTERS                              */
-/* ************************************************************************** */
-
 void	Cluster::_startListen()
 {
 	for (std::vector<Server>::iterator srv = _servers.begin(); srv != _servers.end(); srv++)
@@ -134,7 +130,10 @@ int		Cluster::_startSocket(Server &server, std::string port)
 	fd = socket(sa.sin_family, SOCK_STREAM, 0); //Generar FD de socket
 	status = bind(fd, (struct sockaddr *)&sa, sizeof sa);	//Asigna dirección local para la escucha
 	if (status != 0)
+	{
+		std::cout << "[Server] Bind error: [" << status << "] -> " << strerror(errno) << std::endl;
 		throw errorBindSocket();
+	}
 	status = listen(fd, MAXCLIENT);				//Escucha en el fd del socket con cola de 20
 	if (status != 0)
 		throw errorListenSocket();
@@ -191,7 +190,7 @@ void	Cluster::runServers()
 			//Si error cerrar sockets y lanzar exepcion
 			for (std::vector<pollfd>::iterator pollFDs = _pollFDs.begin(); pollFDs != _pollFDs.end(); pollFDs++)
 			{
-				std::cout << "Cerrando FD " << pollFDs->fd << std::endl;
+				std::cout << "(poll -1) Cerrando FD " << pollFDs->fd << std::endl;
 				close(pollFDs->fd);
 			}
 			throw errorPolling();
@@ -220,6 +219,7 @@ void	Cluster::runServers()
 							continue ;
 						}
 						std::cout << "Cliente conectado en fd: " << tmpFD << std::endl;
+						_tmpRecv[tmpFD] = "";
 						_clients[tmpFD] = _getServerbyFD(_pollFDs[i].fd);
 						_pollFDs.push_back(_makeClientPoll(tmpFD));
 					}
@@ -237,6 +237,7 @@ void	Cluster::runServers()
 				{
 					std::cout << Response(_requests[_pollFDs[i].fd], _clients[_pollFDs[i].fd], _pollFDs[i].fd) << std::endl;
 					//_response(_pollFDs[i]);
+					_tmpRecv[_pollFDs[i].fd].erase();
 					_closeClient(i, pollSize, _pollFDs[i]);
 				}
 			}
@@ -311,15 +312,15 @@ void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *s
 	<< server->getServerName() << std::endl;
 
 	char		buff[BUFFSIZE];
-	std::string	tmp;
+	//std::string	tmp;
 	int			reads = 0;
-	size_t		loop = 0;
+//	size_t		loop = 0;
 
-	while (reads >= 0)
-	{
-		loop++;
+//	while (1)
+//	{
+//		loop++;
 		reads = recv(client.fd, buff, BUFFSIZE, 0);
-		if (reads == -1 && loop == 1)
+		if (reads == -1)// && loop == 1)
 		{
 			close(client.fd);
 			_clients.erase(client.fd);
@@ -329,20 +330,44 @@ void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *s
 			std::cout << "Error reading from client" << std::endl;
 			return ;
 		}
-		if (!(reads >= 0))
+		if (_isCompleteRequest(_tmpRecv[client.fd]))//(!(reads >= 0))
+		{
+			std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
+			std::cout << "Última linea: " << std::endl << "~~~~~~~~~~~" << buff << std::endl << "~~~~~~~~~~~" << std::endl;
+			_tmpRecv[client.fd].insert(_tmpRecv[client.fd].end(), '\0', 1);
+			client.events = POLLOUT;
+			_requests[client.fd] = Request(_tmpRecv[client.fd], client.fd, *server);
+			std::cout << Request(_tmpRecv[client.fd], client.fd, *server) << std::endl;
+ 			return ;
+		}
+		/*if (_isCompleteRequest(tmp))
 		{
 			std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
 			tmp.insert(tmp.end(), '\0', 1);
 			client.events = POLLOUT;
 			_requests[client.fd] = Request(tmp, client.fd, *server);
 			std::cout << Request(tmp, client.fd, *server) << std::endl;
- 			return ;
-		}
+			return ;
+		}*/
 		else
 		{
-			tmp.insert(tmp.end(), buff, buff + reads);
+			_tmpRecv[client.fd].insert(_tmpRecv[client.fd].end(), buff, buff + reads);
 		}
+//	}
+}
+
+bool	Cluster::_isCompleteRequest(std::string req)
+{
+	Request tmp(req);
+	
+	if (tmp.getMethod() == "GET")
+		return (true);
+
+	if (tmp.getMethod() == "POST" && tmp.getContentLength() == tmp.getBody().size())
+	{
+		return (true);
 	}
+	return (false);
 }
 
 void	Cluster::_response(pollfd &client)
@@ -410,6 +435,10 @@ std::string	Cluster::_makeResponse()
 
 	return (header);
 }
+
+/* ************************************************************************** */
+/*                             GETTERS / SETTERS                              */
+/* ************************************************************************** */
 
 std::vector<Server>	Cluster::getServers() const
 {
