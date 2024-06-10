@@ -6,15 +6,6 @@
   </head>
   <body>
 	<p><a href="/">Inicio</a></p>
-	<h1>POST con datos de formulario</h1>
-	<br>
-	<form action = "" method = "post">
-		First Name: <input type = "text" name = "first_name"><br />
-		Last Name: <input type = "text" name = "last_name" />
-		
-		<input type = "submit" value = "Submit" />
-	 </form>
-	 <p></p>
 	 <hr>
 	 <h1>POST con archivo</h1>
 	 <form method="post" enctype="multipart/form-data">

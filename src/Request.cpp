@@ -200,19 +200,18 @@ bool	Request::areHeader()
 bool	Request::areBody()
 {
 	std::map<std::string, std::string> tmp = this->_headerParams;
+	unsigned int	bodySize;
 
-	if (tmp.find("Content-Type") != tmp.end())
-	{
-		if (this->getContentLength() == this->_body.size())
-		{
-			return (true);
-		}
-		return (false);
-	}
+	if (tmp.find("Content-Type") != tmp.end() || getExpect() == "100-continue")
+		bodySize = getContentLength();
 	else
-	{
 		return (true);
-	}
+	std::cout << "Excpect  : " << getExpect() << std::endl;
+	std::cout << "Bodycount: " << getBody().length() << std::endl;
+	std::cout << "bodySize : " << bodySize << std::endl;
+	if (getBody().size() == bodySize)
+		return (true);
+	return (false);
 }
 
 size_t	Request::getContentLength()
@@ -265,6 +264,18 @@ std::string Request::getBoundary() const
 			return (ret);
 		}
 		return (ret);
+	}
+	return (ret);
+}
+
+std::string Request::getExpect() const
+{
+	std::map<std::string, std::string> hParams = this->_headerParams;
+	std::string ret;
+
+	if (hParams.find("Expect") != hParams.end())
+	{
+		ret = hParams["Expect"];
 	}
 	return (ret);
 }

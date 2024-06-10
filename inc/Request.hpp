@@ -54,6 +54,7 @@ class Request
 		size_t	getContentLength();
 		std::string getContentType() const;
 		std::string getBoundary() const;
+		std::string	getExpect() const;
 };
 
 std::ostream	&operator<<(std::ostream &o, Request const &i);

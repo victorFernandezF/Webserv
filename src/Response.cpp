@@ -115,6 +115,8 @@ std::string	Response::_makeResponse(std::string body)
 
 void	Response::_sendResponse(std::string msg)
 {
+	std::cout << "SendResponse: " << msg << std::endl;
+
 	const char *str = msg.c_str();
 	int msg_len = strlen(str);
 	int bytes_sent;
@@ -191,6 +193,7 @@ void	Response::_getMethodTemp()
 	}
 	else
 	{
+		std::cout << "No autoindex" << std::endl;
 		_sendResponse(_makeResponse(_getFile(_parsePathUrl())));
 		return ;
 	}
@@ -251,7 +254,7 @@ void	Response::_getMethod()
 
 void	Response::_postMethod()
 {
-
+	
 }
 
 void	Response::_deleteMethod()
