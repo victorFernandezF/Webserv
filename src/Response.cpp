@@ -254,6 +254,21 @@ void	Response::_getMethod()
 
 void	Response::_postMethod()
 {
+	if (!(_srv.getUploadPath().empty()) && _req.getContentType().find("multipart/form-data") != std::string::npos)
+		_takeFile();
+	else if (_req.getContentType().find("application/x-www-form-urlencoded") != std::string::npos)
+		_takeForm();
+	else
+		_sendResponse(_makeResponse(_getErrorPage(HTTP_METHOD_NOT_ALLOWED)));
+}
+
+void	Response::_takeFile()
+{
+
+}
+
+void	Response::_takeForm()
+{
 	
 }
 

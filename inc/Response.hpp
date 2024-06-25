@@ -61,6 +61,8 @@ class Response
 			std::string _parsePathIndex();
 			std::string	_parsePathUrl();
 			std::string _getFile(std::string name);
+			void	_takeFile();
+			void	_takeForm();
 
 			void	_getMethodTemp();
 
