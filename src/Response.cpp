@@ -134,7 +134,7 @@ std::string _makeReponseTestRedirect()
 	header += "\r\n";
 	header += "Connection: close";
 	header += "\r\n";
-	//header += "Content-Type: text/html";//; charset=utf-8"; 
+	//header += "Content-Type: text/html";//; charset=utf-8";
 	//header += "\r\n";
 	header += "Location: https://www.google.es";
 	header += "\r\n";
@@ -207,7 +207,7 @@ void	Response::_getMethodTemp()
     html += "</head>\n<body>\n";
     html += "<h1>Contenido del directorio:</h1>\n";
     html += "<ul>\n";
- 	
+
 	DIR* directory = opendir(path.c_str());
 	if (!_isPathAFile(req)) {
         struct dirent* entry;
@@ -223,7 +223,7 @@ void	Response::_getMethodTemp()
         }
 		html += "</ul>\n";
 		html += "</body>\n</html>\n";
-    } 
+    }
 
 	return (html);
 }*/
@@ -231,16 +231,16 @@ void	Response::_getMethodTemp()
 bool	Response::_isPathAFile(Request req)
 {
 	size_t dot = req.getPath().find(".");
-	
+
 	if (dot == std::string::npos){
 		if ( dot == req.getPath().size() - 1)
 			return false;
 	}
-	return true; 
+	return true;
 }
 
 /*
-void Response::_isPathAccessible(Request req) 
+void Response::_isPathAccessible(Request req)
 {
 	std::string path = req.getPath();
 	if (access(path.c_str(), F_OK) != 0)
@@ -264,12 +264,57 @@ void	Response::_postMethod()
 
 void	Response::_takeFile()
 {
+	std::string	dir = _loc.getRoot();
+	std::string file = _getFileName();
+	std::string data = _cleanBoundary();
 
+	if (dir.size() - 1 != '/')
+		dir += '/';
+
+	std::cout << "File content:" << std::endl;
+	std::cout << "=============================" << std::endl;
+	std::cout << _cleanBoundary() << std::endl;
+	std::cout << "=============================" << std::endl;
+}
+
+std::string Response::_getFileName()
+{
+	std::string	filename;
+	std::string	body = _req.getBody();
+	size_t		pos = body.find("filename=\"");
+	if (pos != std::string::npos)
+	{
+		std::string tmp;
+		tmp = body.substr(pos + 10);
+		pos = tmp.find("\"");
+		filename = tmp.substr(0, pos);
+	}
+	return (filename);
+}
+
+std::string	Response::_cleanBoundary()
+{
+	std::string	ret;
+	std::string body = _req.getBody();
+
+	std::string boundary = "--" + _req.getBoundary() + "--";
+//	boundary += "--";
+	size_t pos = body.find("\r\n\r\n");
+	std::string tmp;
+
+	if(pos != std::string::npos)
+	{
+		tmp = body.substr(pos + 4);
+		//pos = tmp.find(boundary);
+		pos = tmp.find("\r\n");
+		ret = tmp.substr(0, pos);
+	}
+	return (ret);
 }
 
 void	Response::_takeForm()
 {
-	
+
 }
 
 void	Response::_deleteMethod()
@@ -323,7 +368,7 @@ std::string	Response::_makeResponseRedirect()
 }
 
 std::string Response::_parsePathUrl()
-{	
+{
 	std::string	tmp;
 
 	if (_loc.getLocation() == _req.getPath())
@@ -337,7 +382,7 @@ std::string Response::_parsePathUrl()
 			tmp.erase(tmp[tmp.size() - 1], 1);
 		return (tmp + _req.getPath());
 	}
-	
+
 }
 
 std::string	Response::_parsePathIndex()

@@ -38,7 +38,7 @@ class Response
 			void	_exeResponse();
 
 			bool	_isPathAFile(Request req);
-			void	_isPathAccessible(Request req); 
+			void	_isPathAccessible(Request req);
 			std::string _autoindex(Request req);
 
 			std::string	_getErrorPage(unsigned short nbr);
@@ -62,6 +62,8 @@ class Response
 			std::string	_parsePathUrl();
 			std::string _getFile(std::string name);
 			void	_takeFile();
+			std::string	_getFileName();
+			std::string	_cleanBoundary();
 			void	_takeForm();
 
 			void	_getMethodTemp();
