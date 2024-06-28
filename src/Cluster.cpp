@@ -196,12 +196,13 @@ void	Cluster::runServers()
 		}
 		else
 		{
-			if (status == 0)
+			/*if (status == 0)
 			{
 			//si devulve 0, poll correcto pero sin cambios
 			std::cout << "Esperando conexiones..." << std::endl;
+			std::cout << time(NULL) << std::endl;
 			continue ;
-			}
+			}*/
 			for (size_t i = 0; i < pollSize; i++)
 			{
 				/*std::cout << "·························" << std::endl;
@@ -211,15 +212,17 @@ void	Cluster::runServers()
 				std::cout << "Events: " << _pollFDs[i].events << std::endl;
 				std::cout << "Revents: " << _pollFDs[i]. revents << std::endl;
 				std::cout << "·························" << std::endl;*/
-				if (!_isServerFD(_pollFDs[i].fd))
+				/*if (!_isServerFD(_pollFDs[i].fd))
 				{
 					std::cout << "Now time: " << std::clock() << " - Init time: " << _timeOuts[_pollFDs[i].fd] << std::endl;
 					std::cout << "Time: " << (( std::clock() - _timeOuts[_pollFDs[i].fd] ) / (double)(CLOCKS_PER_SEC * 1000)) << std::endl;
-				}
+				}*/
 				if (!_isServerFD(_pollFDs[i].fd)
-					&&((( std::clock() - _timeOuts[_pollFDs[i].fd] ) / (double)(CLOCKS_PER_SEC * 1000)) > 500))
+					&& _timeOuts[_pollFDs[i].fd] < time(NULL))
+				//	&&((( std::clock() - _timeOuts[_pollFDs[i].fd] ) / (double)(CLOCKS_PER_SEC * 1000)) > 500))
 				{
 					std::cout << "Time out fd " << _pollFDs[i].fd << std::endl;
+					std::cout << "Time conexion " << _timeOuts[_pollFDs[i].fd] << " - Time exit: " << time(NULL) << std::endl;
 					close(_pollFDs[i].fd);
 					_clients.erase(_pollFDs[i].fd);
 					_tmpRecv[_pollFDs[i].fd].erase();
@@ -241,7 +244,8 @@ void	Cluster::runServers()
 							continue ;
 						}
 						std::cout << "Cliente conectado en fd: " << tmpFD << std::endl;
-						_timeOuts[tmpFD] = std::clock();
+						//_timeOuts[tmpFD] = std::clock();
+						_timeOuts[tmpFD] = time(NULL) + TIMEOUT;
 						std::cout << "Init time: " << _timeOuts[tmpFD] << std::endl;
 						_tmpRecv[tmpFD] = "";
 						_clients[tmpFD] = _getServerbyFD(_pollFDs[i].fd);
@@ -410,6 +414,7 @@ int	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *se
 	if (reads > 0)
 	{
 		_tmpRecv[client.fd].insert(_tmpRecv[client.fd].end(), buff, buff + reads);
+		_timeOuts[client.fd] = time(NULL) + TIMEOUT;
 	}
 	if (reads == -1)
 	{
@@ -434,9 +439,9 @@ int	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *se
 		std::cout << Request(_tmpRecv[client.fd], client.fd, *server) << std::endl;*/
 			return (1);
 		}
-		std::cout << "Conexión " << client.fd << " , NOT complete ELSE" << std::endl;
+		//std::cout << "Conexión " << client.fd << " , NOT complete ELSE" << std::endl;
 	}
-	std::cout << "Conexión " << client.fd << " , NOT complete OUT" << std::endl;
+	//std::cout << "Conexión " << client.fd << " , NOT complete OUT" << std::endl;
 	return (0);
 	/*if (_isCompleteRequest(tmp))
 	{
@@ -452,7 +457,7 @@ int	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *se
 bool	Cluster::_isCompleteRequest(std::string req)
 {
 	Request tmp(req);
-	
+
 	if (tmp.getMethod() == "GET")
 	{
 		if (tmp.areHeader())
@@ -482,10 +487,10 @@ void	Cluster::_response(pollfd &client)
 	}
 	else if (bytes_sent == msg_len)
 	{
-		std::cerr << std::endl << "Sent full message to client socket " << client.fd << ": " 
+		std::cerr << std::endl << "Sent full message to client socket " << client.fd << ": "
 		<< std::endl << std::endl;
 	}
-	else 
+	else
 	{
 		std::cerr << "Sent partial message to client socket " << client.fd << ": " << bytes_sent
 		<< " bytes sent" << std::endl;
@@ -578,7 +583,7 @@ std::ostream	&operator<<(std::ostream &o, Cluster const &i)
 			o << std::endl;
 			o << "Location number " << nbrl << std::endl;
 			o << "Location: " << itl->getLocation() << std::endl;
-			o << "Return: " << itl->getReturn() << std::endl; 
+			o << "Return: " << itl->getReturn() << std::endl;
 			o << "Root: " << itl->getRoot() << std::endl;
 			o << "Autoindex: " << itl->getAutoIndex() << std::endl;
 			o << "Index: " << itl->getIndex() << std::endl;

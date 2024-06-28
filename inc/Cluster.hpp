@@ -26,6 +26,7 @@
 # include "ft_utils.hpp"
 
 # define MAXCLIENT 20
+# define TIMEOUT 5
 # define BUFFSIZE 2048
 
 class Cluster
@@ -40,7 +41,7 @@ class Cluster
 
 		void	_startListen();
 		int		_startSocket(Server &server, std::string port);
-		
+
 		void	_makeServerPolls();
 		bool	_isServerFD(int fd);
 		pollfd	_makeClientPoll(int fd);
@@ -64,7 +65,7 @@ class Cluster
 		void	runServers();
 
 		void	_closeFDs();
-		
+
 
 		class errorParseListenPort;
 		class errorBindSocket;
