@@ -199,7 +199,7 @@ void	Response::_getMethodTemp()
 	}
 }
 
-/*std::string Response::_autoindex(Request req){
+std::string Response::_autoindex(Request req){
 	std::string html = "";
 	std::string path = req.getPath();
 	html = "<!DOCTYPE html>\n<html>\n<head>\n";
@@ -211,7 +211,7 @@ void	Response::_getMethodTemp()
 	DIR* directory = opendir(path.c_str());
 	if (!_isPathAFile(req)) {
         struct dirent* entry;
-        while ((entry = readdir(directory)) != nullptr) {
+        while ((entry = readdir(directory)) != NULL) {
             std::string name = entry->d_name;
             if (name != "." && name != "..") {
 				if (entry->d_type == DT_REG) {
@@ -224,31 +224,24 @@ void	Response::_getMethodTemp()
 		html += "</ul>\n";
 		html += "</body>\n</html>\n";
     }
-
 	return (html);
-}*/
+}
 
-bool	Response::_isPathAFile(Request req)
-{
+bool Response::_isPathAFile(Request req){
 	size_t dot = req.getPath().find(".");
-
-	if (dot == std::string::npos){
-		if ( dot == req.getPath().size() - 1)
+	if (dot == std::string::npos)
+		if (dot == req.getPath().size() - 1)
 			return false;
-	}
 	return true;
 }
 
-/*
-void Response::_isPathAccessible(Request req)
-{
+void Response::_isPathAccesible(Request req){
 	std::string path = req.getPath();
 	if (access(path.c_str(), F_OK) != 0)
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_METHOD_NOT_ALLOWED)));
-}*/
+}
 
-void	Response::_getMethod()
-{
+void	Response::_getMethod(){
 	_sendResponse(_makeResponseTest());
 }
 

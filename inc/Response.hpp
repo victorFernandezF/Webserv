@@ -2,6 +2,7 @@
 # define RESPONSE_HPP
 
 # include <iostream>
+#include <unistd.h>
 # include <map>
 # include <cstring>
 # include <sys/socket.h>
@@ -38,7 +39,7 @@ class Response
 			void	_exeResponse();
 
 			bool	_isPathAFile(Request req);
-			void	_isPathAccessible(Request req);
+			void 	_isPathAccesible(Request req);
 			std::string _autoindex(Request req);
 
 			std::string	_getErrorPage(unsigned short nbr);
