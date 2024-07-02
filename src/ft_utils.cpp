@@ -6,7 +6,7 @@
 /*   By: fortega- <fortega-@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/21 12:30:32 by fortega-          #+#    #+#             */
-/*   Updated: 2024/05/30 15:22:05 by fortega-         ###   ########.fr       */
+/*   Updated: 2024/07/02 10:02:11 by fortega-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ bool	ft_isBeginStr(std::string orig, std::string toCheck)
 std::string	ft_itoa(int nbr)
 {
 	std::string	str;
+	std::string	tmp;
 	
 	if (nbr < 0)
 	{
@@ -52,7 +53,8 @@ std::string	ft_itoa(int nbr)
 	}
 	while (nbr > 0)
 	{
-		str += (nbr % 10) + '0';
+		tmp = (nbr % 10) + '0';
+		str = tmp + str;
 		nbr = nbr / 10;
 	}
 	//str += '\0';

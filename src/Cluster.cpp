@@ -198,10 +198,16 @@ void	Cluster::runServers()
 		{
 			/*if (status == 0)
 			{
-			//si devulve 0, poll correcto pero sin cambios
-			std::cout << "Esperando conexiones..." << std::endl;
-			std::cout << time(NULL) << std::endl;
-			continue ;
+				loops++;
+				//si devulve 0, poll correcto pero sin cambios
+				std::cout << "Esperando conexiones..." << std::endl;
+				if (loops == 5)
+				{
+					loops = 0;
+					system("clear");
+				}
+				//std::cout << time(NULL) << std::endl;
+				continue ;
 			}*/
 			for (size_t i = 0; i < pollSize; i++)
 			{
@@ -223,6 +229,7 @@ void	Cluster::runServers()
 				{
 					std::cout << "Time out fd " << _pollFDs[i].fd << std::endl;
 					std::cout << "Time conexion " << _timeOuts[_pollFDs[i].fd] << " - Time exit: " << time(NULL) << std::endl;
+					Response(HTTP_REQUEST_TIMEOUT, _pollFDs[i].fd);
 					close(_pollFDs[i].fd);
 					_clients.erase(_pollFDs[i].fd);
 					_tmpRecv[_pollFDs[i].fd].erase();
@@ -282,6 +289,10 @@ void	Cluster::runServers()
 					std::cout << Response(_requests[_pollFDs[i].fd], _clients[_pollFDs[i].fd], _pollFDs[i].fd) << std::endl;
 					//_response(_pollFDs[i]);
 					_tmpRecv[_pollFDs[i].fd].erase();
+					_closeClient(i, pollSize, _pollFDs[i]);
+				}
+				if ((_pollFDs[i].revents & POLLERR) || _pollFDs[i].revents & POLLHUP)
+				{
 					_closeClient(i, pollSize, _pollFDs[i]);
 				}
 			}

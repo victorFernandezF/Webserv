@@ -34,6 +34,14 @@ Response::Response(Request req, Server *srv, int client)
 	return ;
 }
 
+Response::Response(int code, int fd)
+{
+	_clientFD = fd;
+	_sendResponse(_makeResponse(_getErrorPage(code)));
+
+	return ;
+}
+
 Response::~Response()
 {
 	return ;
@@ -247,6 +255,7 @@ void	Response::_getMethod(){
 
 void	Response::_postMethod()
 {
+	std::cout << "Entra postMethod" << std::endl;
 	if (!(_srv.getUploadPath().empty()) && _req.getContentType().find("multipart/form-data") != std::string::npos)
 		_takeFile();
 	else if (_req.getContentType().find("application/x-www-form-urlencoded") != std::string::npos)
@@ -260,14 +269,46 @@ void	Response::_takeFile()
 	std::string	dir = _loc.getRoot();
 	std::string file = _getFileName();
 	std::string data = _cleanBoundary();
+	int 		status;
 
 	if (dir.size() - 1 != '/')
 		dir += '/';
 
-	std::cout << "File content:" << std::endl;
+	dir = dir + _srv.getUploadPath();
+
+	/*std::cout << "File content:" << std::endl;
 	std::cout << "=============================" << std::endl;
 	std::cout << _cleanBoundary() << std::endl;
-	std::cout << "=============================" << std::endl;
+	std::cout << "=============================" << std::endl;*/
+
+	if (!(data.empty()) && !(file.empty()))
+	{
+		struct stat fold;
+		status = stat(dir.c_str(), &fold);
+		if (status == -1)
+			mkdir(dir.c_str(), 0700);
+		
+		if (dir.size() - 1 != '/')
+			dir += '/';
+		dir = dir + file;
+	//	std::cout << "Ruta completa: " << dir << std::endl;
+		status = open(dir.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	//	std::cout << "Status open: " << status << std::endl;
+		if (status > 0)
+		{
+			write(status, data.c_str(), data.size());
+			close(status);
+			_sendResponse(_makeResponse(_getErrorPage(HTTP_CREATED)));
+		}
+		else
+		{
+			_sendResponse(_makeResponse(_getErrorPage(HTTP_INTERNAL_SERVER_ERROR)));
+		}
+	}
+	else
+	{
+		_sendResponse(_makeResponse(_getErrorPage(HTTP_BAD_REQUEST)));
+	}
 }
 
 std::string Response::_getFileName()
@@ -299,9 +340,13 @@ std::string	Response::_cleanBoundary()
 	{
 		tmp = body.substr(pos + 4);
 		//pos = tmp.find(boundary);
-		pos = tmp.find("\r\n");
-		ret = tmp.substr(0, pos);
+		pos = tmp.find_last_of("\r\n");
+		ret = tmp.substr(0, pos - boundary.size());
 	}
+
+	/*std::cout << "??????????????????????????????" << std::endl;
+	std::cout << ret << std::endl;
+	std::cout << "??????????????????????????????" << std::endl;*/
 	return (ret);
 }
 
@@ -513,6 +558,8 @@ std::string Response::_getCodePageText(unsigned short nbr)
 		return ("Request-URI Too Long");
 	if (nbr == HTTP_INTERNAL_SERVER_ERROR)
 		return ("Internal Server Error");
+	if (nbr == HTTP_REQUEST_TIMEOUT)
+		return ("Request Timeout");
 	return ("");
 }
 
@@ -544,7 +591,7 @@ std::ostream	&operator<<(std::ostream &o, Response const &i)
 	std::cout << "*******************************************************" << std::endl;
 	std::cout << std::endl << "En Response:" << std::endl << std::endl;
 	std::cout << "Cliente: " << i.getClientFD() << std::endl;
-	std::cout << i.getRequest() << std::endl;
+	//std::cout << i.getRequest() << std::endl;
 	/*std::cout << std::endl << "/////////////////" << std::endl;
 	std::cout << "ContentType = " << i.getRequest().getContentType() << std::endl;
 	std::cout << "Boundry = " << i.getRequest().getBoundary() << std::endl << "/////////////////" << std::endl;*/
