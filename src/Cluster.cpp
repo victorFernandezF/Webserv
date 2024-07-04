@@ -13,6 +13,24 @@ class	Cluster::errorParseListenPort : public std::exception
 		}
 };
 
+class	Cluster::errorCreateSocket : public std::exception
+{
+	public:
+		virtual const char *what(void) const throw()
+		{
+			return ("Error: creating socket error");
+		}
+};
+
+class	Cluster::errorOptSocket : public std::exception
+{
+	public:
+		virtual const char *what(void) const throw()
+		{
+			return ("Error: set option socket error");
+		}
+};
+
 class	Cluster::errorBindSocket : public std::exception
 {
 	public:
@@ -120,6 +138,7 @@ int		Cluster::_startSocket(Server &server, std::string port)
 	struct sockaddr_in 		sa;
 	int						fd;
 	int						status;
+	int						optval = 1;
 
 	//Rellenar datos para el socket
 	bzero(&sa, sizeof(sa));	//Todo a 0
@@ -128,21 +147,29 @@ int		Cluster::_startSocket(Server &server, std::string port)
 	sa.sin_port = htons(ft_atoiUnInt(port));
 
 	fd = socket(sa.sin_family, SOCK_STREAM, 0); //Generar FD de socket
+	if (fd < 0)
+		throw errorCreateSocket();
+
+	status = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+	if (status != 0)
+		throw errorOptSocket();
+
 	status = bind(fd, (struct sockaddr *)&sa, sizeof sa);	//Asigna dirección local para la escucha
 	if (status != 0)
 	{
 		std::cout << "[Server] Bind error: [" << status << "] -> " << strerror(errno) << std::endl;
 		throw errorBindSocket();
 	}
+
 	status = listen(fd, MAXCLIENT);				//Escucha en el fd del socket con cola de 20
 	if (status != 0)
 		throw errorListenSocket();
+
 	status = fcntl(fd, F_SETFL, O_NONBLOCK);	//Establece el fd objetivo en no bloqueante
 	if (status != 0)
 		throw errorNonBlockFD();
 	return (fd);
 }
-
 
 void	Cluster::_makeServerPolls()
 {

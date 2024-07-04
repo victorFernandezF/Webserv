@@ -68,6 +68,8 @@ class Cluster
 
 
 		class errorParseListenPort;
+		class errorCreateSocket;
+		class errorOptSocket;
 		class errorBindSocket;
 		class errorListenSocket;
 		class errorNonBlockFD;
