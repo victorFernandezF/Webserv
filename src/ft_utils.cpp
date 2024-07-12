@@ -6,7 +6,7 @@
 /*   By: fortega- <fortega-@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/21 12:30:32 by fortega-          #+#    #+#             */
-/*   Updated: 2024/07/02 10:02:11 by fortega-         ###   ########.fr       */
+/*   Updated: 2024/07/12 13:03:17 by fortega-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -344,4 +344,17 @@ bool	ft_atofCheck(const char *str)
 		i++;
 	}
 	return (true);
+}
+
+
+std::string str_tolower(std::string str)
+{		
+
+	for (size_t i = 0; i < str.size(); i++)
+	{
+		if (str[i] > 64 && str[i] < 91)
+			str[i] = str[i] + 32;
+	}
+
+    return str;
 }

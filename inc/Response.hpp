@@ -11,6 +11,7 @@
 # include <sys/stat.h>
 # include <Server.hpp>
 # include <dirent.h>
+
 # include <Request.hpp>
 
 # include <ft_utils.hpp>
@@ -36,6 +37,7 @@ class Response
 			Server 	_srv;
 			Location	_loc;
 			int		_clientFD;
+			std::string	_contentType;
 
 			Response();
 
@@ -65,6 +67,7 @@ class Response
 			std::string _parsePathIndex();
 			std::string	_parsePathUrl();
 			std::string _getFile(std::string name);
+			std::string	_takeContentType(std::string filename);
 			void	_takeFile();
 			std::string	_getFileName();
 			std::string	_cleanBoundary();
@@ -82,6 +85,7 @@ class Response
 		Request getRequest() const;
 		Server	getServer() const;
 		int		getClientFD() const;
+		std::string	getContentType() const;
 };
 
 std::ostream	&operator<<(std::ostream &o, Response const &i);

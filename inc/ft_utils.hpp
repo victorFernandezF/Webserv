@@ -6,7 +6,7 @@
 /*   By: fortega- <fortega-@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/21 12:29:37 by fortega-          #+#    #+#             */
-/*   Updated: 2024/05/30 15:22:22 by fortega-         ###   ########.fr       */
+/*   Updated: 2024/07/12 12:55:44 by fortega-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <iostream>
 # include <limits>
 # include <vector>
+# include <algorithm>
 
 bool			ft_isBeginStr(std::string orig, std::string toCheck);
 std::string		ft_itoa(int nbr);
@@ -27,5 +28,6 @@ bool			ft_atoiUnIntCheck(std::string const std_str);
 bool			ft_atoiErrorPageCheck(std::string const std_str);
 bool			ft_atodCheck(const char *str);
 bool			ft_atofCheck(const char *str);
+std::string 	str_tolower(std::string s);
 
 #endif

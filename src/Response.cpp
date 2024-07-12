@@ -28,6 +28,7 @@ Response::Response(Request req, Server *srv, int client)
 	_srv = *srv;
 	_req = req;
 	_clientFD = client;
+	_contentType = "text/html";
 
 	_exeResponse();
 
@@ -109,7 +110,9 @@ std::string	Response::_makeResponse(std::string body)
 	ret += "\r\n";
 	ret += "Connection: close";
 	ret += "\r\n";
-	ret += "Content-Type: text/html"; //Crear función para rellenar Content-Type
+	//ret += "Content-Type: text/html"; //Crear función para rellenar Content-Type
+	ret += "Content-Type: ";
+	ret += getContentType();
 	ret += "\r\n";
 	ret += "Content-Length: ";
 	ret += ft_itoa(body.size());
@@ -123,7 +126,7 @@ std::string	Response::_makeResponse(std::string body)
 
 void	Response::_sendResponse(std::string msg)
 {
-	std::cout << "SendResponse: " << msg << std::endl;
+	//std::cout << "SendResponse: " << msg << std::endl;
 
 	const char *str = msg.c_str();
 	int msg_len = strlen(str);
@@ -193,6 +196,8 @@ void	Response::_getMethodTemp()
 {
 	std::string	resp;
 
+//Hay que hacer redirect?
+
 	if (_loc.getAutoIndex())
 	{
 //		std::string html = _autoindex();
@@ -201,6 +206,7 @@ void	Response::_getMethodTemp()
 	}
 	else
 	{
+//
 		std::cout << "No autoindex" << std::endl;
 		_sendResponse(_makeResponse(_getFile(_parsePathUrl())));
 		return ;
@@ -437,20 +443,71 @@ std::string	Response::_parsePathIndex()
 
 std::string	Response::_getFile(std::string name)
 {
-	std::ifstream	file(name.c_str());
+	//std::ifstream	file(name.c_str());
+	std::ifstream	file;
 	std::string 	ret;
-	std::string 	line;
+	//std::string 	line;
+	std::stringstream buff;
+
+	file.open(name.c_str(), std::ifstream::in);
 
 	if (!file.is_open())
 		return (_getErrorPage(HTTP_NOT_FOUND));
 
-	while (getline(file, line))
+	_contentType = _takeContentType(name);
+	/*while (getline(file, line))
 	{
 		ret += line;
 		ret += '\n';
-	}
+	}*/
 
+	buff << file.rdbuf();
+	ret = buff.str();
+
+	file.close();
+	
 	return (ret);
+}
+
+std::string Response::_takeContentType(std::string filename)
+{
+	std::string ret;
+	std::string ext;
+	size_t		pos = filename.find_last_of(".");
+
+	if (pos != std::string::npos)
+		ext = str_tolower(filename.substr(pos + 1));
+	else
+		return("unknown");
+
+	if (ext == "html")
+		return ("text/html");
+	else if (ext == "txt")
+		return ("text/plain");
+	else if (ext == "csv")
+		return ("text/csv");
+	else if (ext == "xml")
+		return ("text/xml");
+	else if (ext == "css")
+		return ("text/css");
+	else if (ext == "gif")
+		return ("image/gif");
+	else if (ext == "jpeg" || ext == "jpg")
+		return ("image/jpeg");
+	else if (ext == "png")
+		return ("image/png");
+	else if (ext == "tiff")
+		return ("image/tiff");
+	else if (ext == "js")
+		return ("application/javascript");
+	else if (ext == "pdf")
+		return ("application/pdf");
+	else if (ext == "json")
+		return ("application/json");
+	else if (ext == "zip")
+		return ("application/zip");
+	else
+		return ("unknown/" + ext);
 }
 
 std::string	Response::_getErrorPage(unsigned short nbr)
@@ -580,6 +637,11 @@ Server Response::getServer() const
 int	Response::getClientFD() const
 {
 	return (_clientFD);
+}
+
+std::string Response::getContentType() const
+{
+	return (_contentType);
 }
 
 /* ************************************************************************** */
