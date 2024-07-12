@@ -206,6 +206,7 @@ void	Cluster::runServers()
 
 	while (1)
 	{
+		
 		struct sockaddr_storage	client_addr;	//almacenar dirección cliente
 		socklen_t				addr_size = sizeof(client_addr);		//tamaño del estruct client_addr;
 		int	tmpFD;

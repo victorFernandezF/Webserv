@@ -43,6 +43,9 @@ ${OBJ_DIR}%.o: ${SRC_DIR}%.cpp
 $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
 
+gdb: $(OBJ)
+	$(CC) -g $(CFLAGS) -o $(NAME) $(OBJ)
+
 clean:
 	$(RM) $(OBJ)
 
