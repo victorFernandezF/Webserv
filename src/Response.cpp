@@ -76,6 +76,9 @@ std::string _makeReponseTestRedirect();
 
 void	Response::_exeResponse()
 {
+std::string lcoat = _req.getPath();
+(void)lcoat;
+
 	if (_isLocation(_req.getPath()))
 	{
 		if (_isAllowedMethod())
@@ -106,11 +109,14 @@ std::string	Response::_makeResponse(std::string body)
 {
 	std::string ret;
 
+	int	syze = body.size();
+	(void)syze;
+
+
 	ret += "HTTP/1.1 200 OK";
 	ret += "\r\n";
 	ret += "Connection: close";
 	ret += "\r\n";
-	//ret += "Content-Type: text/html"; //Crear función para rellenar Content-Type
 	ret += "Content-Type: ";
 	ret += getContentType();
 	ret += "\r\n";
@@ -121,6 +127,9 @@ std::string	Response::_makeResponse(std::string body)
 	ret += body;
 	ret += "\r\n\r\n";
 
+	int	syze2 = ret.size();
+	(void)syze2;
+
 	return (ret);
 }
 
@@ -129,10 +138,13 @@ void	Response::_sendResponse(std::string msg)
 	//std::cout << "SendResponse: " << msg << std::endl;
 
 	const char *str = msg.c_str();
-	int msg_len = strlen(str);
+	int msg_len = msg.size();
 	int bytes_sent;
 
 	bytes_sent = send(_clientFD, str, msg_len, 0);
+
+	//std::cout << "MSG size: " << msg_len << std::endl;
+	//std::cout << "Bytes sent: " << bytes_sent << std::endl;
 	(void)bytes_sent;
 }
 
@@ -147,6 +159,7 @@ std::string _makeReponseTestRedirect()
 	header += "\r\n";
 	//header += "Content-Type: text/html";//; charset=utf-8";
 	//header += "\r\n";
+//Hacer funcion std::string	Response::_makeResponseRedirect()
 	header += "Location: https://www.google.es";
 	header += "\r\n";
 	header += "Content-Length: ";
@@ -194,7 +207,7 @@ std::string _makeResponseTest()
 
 void	Response::_getMethodTemp()
 {
-	std::string	resp;
+	//std::string	resp;
 
 //Hay que hacer redirect?
 
@@ -448,6 +461,7 @@ std::string	Response::_getFile(std::string name)
 	std::string 	ret;
 	//std::string 	line;
 	std::stringstream buff;
+	//char			buff;
 
 	file.open(name.c_str(), std::ifstream::in);
 
@@ -455,16 +469,25 @@ std::string	Response::_getFile(std::string name)
 		return (_getErrorPage(HTTP_NOT_FOUND));
 
 	_contentType = _takeContentType(name);
+
 	/*while (getline(file, line))
 	{
 		ret += line;
 		ret += '\n';
 	}*/
 
+	/*while (file.get(buff))
+	{
+		ret += buff;
+	}*/
+
 	buff << file.rdbuf();
 	ret = buff.str();
 
 	file.close();
+
+	/*int	syze = ret.size();
+	(void)syze;*/
 	
 	return (ret);
 }
@@ -546,7 +569,8 @@ std::string	Response::_makeErrorPage(unsigned short nbr)
 {
 	std::string ret;
 
-	ret += _makeHtmlHead("Error");
+	if (nbr != 201)
+		ret += _makeHtmlHead("Error");
 	ret += _makeErrorBody(nbr);
 	ret += _makeHtmlTail();
 
