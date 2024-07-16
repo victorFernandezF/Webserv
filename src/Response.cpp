@@ -214,6 +214,7 @@ void	Response::_getMethodTemp()
 	if (_loc.getAutoIndex())
 	{
 //		std::string html = _autoindex();
+		_sendResponse(_makeResponse(_autoindex()));
 		//Función de listado de ficheros, si procede, y construcción de html correspondiente
 		return ;
 	}
@@ -226,23 +227,27 @@ void	Response::_getMethodTemp()
 	}
 }
 
-std::string Response::_autoindex(Request req){
+std::string Response::_autoindex(){
 	std::string html = "";
-	std::string path = req.getPath();
+	std::string path = _loc.getRoot();
 	html = "<!DOCTYPE html>\n<html>\n<head>\n";
     html += "<title>Autoindex</title>\n";
     html += "</head>\n<body>\n";
     html += "<h1>Contenido del directorio:</h1>\n";
     html += "<ul>\n";
 
+	if (access(path.c_str(), F_OK) != 0)
+		_sendResponse(_makeResponse(_getErrorPage(HTTP_METHOD_NOT_ALLOWED)));
+
 	DIR* directory = opendir(path.c_str());
-	if (!_isPathAFile(req)) {
+//	if (!_isPathAFile(path)) {
+//	if (_isPathAccesible(path)) {
         struct dirent* entry;
         while ((entry = readdir(directory)) != NULL) {
             std::string name = entry->d_name;
             if (name != "." && name != "..") {
 				if (entry->d_type == DT_REG) {
-                      html += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
+                      html += "<li><a href=\"" + _req.getPath() + "\\" + name + "\">" + name + "</a></li>\n";
                 } else if (entry->d_type == DT_DIR) {
                       html += "<li><a href=\"" + name + "/\">" + name + "</a></li>\n";
                 }
@@ -250,20 +255,20 @@ std::string Response::_autoindex(Request req){
         }
 		html += "</ul>\n";
 		html += "</body>\n</html>\n";
-    }
+//    }
 	return (html);
 }
 
-bool Response::_isPathAFile(Request req){
-	size_t dot = req.getPath().find(".");
+bool Response::_isPathAFile(std::string path){
+	size_t dot = path.find(".");
 	if (dot == std::string::npos)
-		if (dot == req.getPath().size() - 1)
+		if (dot == path.size() - 1)
 			return false;
 	return true;
 }
 
-void Response::_isPathAccesible(Request req){
-	std::string path = req.getPath();
+void Response::_isPathAccesible(std::string path){
+	//std::string path = req.getPath();
 	if (access(path.c_str(), F_OK) != 0)
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_METHOD_NOT_ALLOWED)));
 }
@@ -390,17 +395,24 @@ bool	Response::_isLocation(std::string loc)
 			_loc = *it;
 			return (true);
 		}
-		if (loc.find(it->getLocation()) != std::string::npos
+/*		if (loc.find(it->getLocation()) != std::string::npos
 			&& ft_isBeginStr(loc, it->getLocation())
 			&& (it->getLocation().size() == 1 || loc[it->getLocation().size()] == '/'))
 		{
 			_loc = *it;
 			return (true);
+		}*/
+		if (it->getLocation().find(loc) != std::string::npos
+			&& ft_isBeginStr(it->getLocation(), loc))
+			//&& (it->getLocation().size() == 1 || loc[it->getLocation().size()] == '/'))
+		{
+			_loc = *it;
+			return (true);
 		}
-		else
+		/*else
 		{
 			return (false);
-		}
+		}*/
 	}
 	return (false);
 }

@@ -43,9 +43,9 @@ class Response
 
 			void	_exeResponse();
 
-			bool	_isPathAFile(Request req);
-			void 	_isPathAccesible(Request req);
-			std::string _autoindex(Request req);
+			bool	_isPathAFile(std::string path);
+			void 	_isPathAccesible(std::string path);
+			std::string _autoindex();
 
 			std::string	_getErrorPage(unsigned short nbr);
 			std::string	_makeErrorPage(unsigned short nrb);
