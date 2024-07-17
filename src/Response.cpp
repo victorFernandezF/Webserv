@@ -357,32 +357,8 @@ std::string Response::_autoindex(){
 }
 
 bool Response::_isPathAFile(std::string path){
-	//size_t dot = path.find(".");
 	std::size_t found = path.rfind(".");
-	if (path[found + 1] == '/') return false;
-	std::cout<<found<<std::endl;
- return true;
-	/* int size = path.size() -1;
-	std::cout<<path[0]<<std::endl;return true;
-	int pos = 0;
-	while (size){
-		if (path[size] == ".")
-			pos = size;
-		size--;
-	}
-	if (path[size + 1] == "/") return false;
-	return true; */
-/* 
-
-	std::cout << "dot "<< path << dot <<std::string::npos<<std::endl;
-	
-	
-	
-	if (path[])
-	if (dot == std::string::npos)
-		if (dot == path.size() - 1)
-			return false;
-	return true; */
+	return path[found + 1] != '/' ? true :false;
 }
 
 bool Response::_isPathAccesible(std::string path){
