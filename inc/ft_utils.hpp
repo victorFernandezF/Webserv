@@ -6,7 +6,7 @@
 /*   By: fortega- <fortega-@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/21 12:29:37 by fortega-          #+#    #+#             */
-/*   Updated: 2024/07/12 12:55:44 by fortega-         ###   ########.fr       */
+/*   Updated: 2024/07/17 08:31:58 by fortega-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 # include <vector>
 # include <algorithm>
 
-bool			ft_isBeginStr(std::string orig, std::string toCheck);
+bool			ft_isBeginStr(std::string reqPath, std::string locPath);
 std::string		ft_itoa(int nbr);
 int				ft_atoi(std::string const str);
 unsigned int	ft_atoiUnInt(std::string const str);

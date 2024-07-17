@@ -38,6 +38,7 @@ class Response
 			Location	_loc;
 			int		_clientFD;
 			std::string	_contentType;
+			std::string _resourcePath;
 
 			Response();
 
@@ -46,6 +47,7 @@ class Response
 			bool	_isPathAFile(std::string path);
 			void 	_isPathAccesible(std::string path);
 			std::string _autoindex();
+			int		_isFolderOrFile();
 
 			std::string	_getErrorPage(unsigned short nbr);
 			std::string	_makeErrorPage(unsigned short nrb);
@@ -73,7 +75,7 @@ class Response
 			std::string	_cleanBoundary();
 			void	_takeForm();
 
-			void	_getMethodTemp();
+//			void	_getMethodTemp();
 
 	public:
 		Response(Response const &src);

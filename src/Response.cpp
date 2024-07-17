@@ -86,7 +86,7 @@ std::string lcoat = _req.getPath();
 			if (_req.getMethod() == "GET")
 			{
 				//_sendResponse(_makeReponseTestRedirect());
-				_getMethodTemp();
+				_getMethod();
 			}
 			else if (_req.getMethod() == "POST")
 				_postMethod();
@@ -103,6 +103,93 @@ std::string lcoat = _req.getPath();
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_NOT_FOUND)));
 	}
 
+}
+
+bool	Response::_isLocation(std::string loc)
+{
+	std::vector<Location> paths = _srv.getLocations();
+	size_t pos;
+	std::string tmp;
+
+	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
+	{
+		if (it->getLocation() == loc)
+		{
+			_loc = *it;
+			return (true);
+		}
+	}
+	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
+	{
+		if (it->getLocation() == loc)
+		{
+			_loc = *it;
+			return (true);
+		}
+/*		if (loc.find(it->getLocation()) != std::string::npos
+			&& ft_isBeginStr(loc, it->getLocation())
+			&& (it->getLocation().size() == 1 || loc[it->getLocation().size()] == '/'))
+		{
+			_loc = *it;
+			return (true);
+		}*/
+		
+	
+		if (/*it->getLocation().find(loc) != std::string::npos
+			&& */ft_isBeginStr(loc, it->getLocation()))
+			//&& (it->getLocation().size() == 1 || loc[it->getLocation().size()] == '/'))
+		{
+			pos = loc.find(it->getLocation());
+			tmp = loc.substr(pos + it->getLocation().size());
+			if ((tmp.size() > 0 && tmp[0] == '/')
+				|| tmp.find('/') == std::string::npos)
+			{
+				_loc = *it;
+				_resourcePath = _loc.getRoot();
+				if (_resourcePath[_resourcePath.size() - 1] != '/')
+					_resourcePath += '/';
+				_resourcePath += tmp;
+				return (true);
+			}
+		}
+		/*else
+		{
+			return (false);
+		}*/
+	}
+	return (false);
+}
+
+bool	Response::_isAllowedMethod()
+{
+	std::vector<std::string> mths = _loc.getMethods();
+	for (std::vector<std::string>::iterator mt = mths.begin(); mt != mths.end(); mt++)
+	{
+		if (*mt == _req.getMethod())
+			return (true);
+	}
+	return (false);
+}
+
+void	Response::_getMethod()
+{
+	//std::string	path = _resourcePath;
+
+//Hay que hacer redirect?
+
+	if (_loc.getAutoIndex() && _loc.getLocation() == _req.getPath())// && access(path.c_str(), F_OK) == 0)
+	{
+//		std::string html = _autoindex();
+		_sendResponse(_makeResponse(_autoindex()));
+		//Función de listado de ficheros, si procede, y construcción de html correspondiente
+		return ;
+	}
+	else
+	{
+		_sendResponse(_makeResponse(_getFile(_parsePathUrl())));
+		//_sendResponse(_makeResponse(_getFile(_resourcePath)));
+		return ;
+	}
 }
 
 std::string	Response::_makeResponse(std::string body)
@@ -205,34 +292,13 @@ std::string _makeResponseTest()
 	return (header);
 }
 
-void	Response::_getMethodTemp()
-{
-	//std::string	resp;
-
-//Hay que hacer redirect?
-
-	if (_loc.getAutoIndex())
-	{
-//		std::string html = _autoindex();
-		_sendResponse(_makeResponse(_autoindex()));
-		//Función de listado de ficheros, si procede, y construcción de html correspondiente
-		return ;
-	}
-	else
-	{
-//
-		std::cout << "No autoindex" << std::endl;
-		_sendResponse(_makeResponse(_getFile(_parsePathUrl())));
-		return ;
-	}
-}
-
 std::string Response::_autoindex(){
 	std::string html = "";
 	std::string path = _loc.getRoot();
 	html = "<!DOCTYPE html>\n<html>\n<head>\n";
     html += "<title>Autoindex</title>\n";
     html += "</head>\n<body>\n";
+	html += "<p><a href=\"/\">Inicio</a></p>\n";
     html += "<h1>Contenido del directorio:</h1>\n";
     html += "<ul>\n";
 
@@ -273,13 +339,17 @@ void Response::_isPathAccesible(std::string path){
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_METHOD_NOT_ALLOWED)));
 }
 
-void	Response::_getMethod(){
-	_sendResponse(_makeResponseTest());
+int	Response::_isFolderOrFile()
+{
+	return (0);
 }
+
+/*void	Response::_getMethod(){
+	_sendResponse(_makeResponseTest());
+}*/
 
 void	Response::_postMethod()
 {
-	std::cout << "Entra postMethod" << std::endl;
 	if (!(_srv.getUploadPath().empty()) && _req.getContentType().find("multipart/form-data") != std::string::npos)
 		_takeFile();
 	else if (_req.getContentType().find("application/x-www-form-urlencoded") != std::string::npos)
@@ -384,50 +454,6 @@ void	Response::_deleteMethod()
 
 }
 
-bool	Response::_isLocation(std::string loc)
-{
-	std::vector<Location> paths = _srv.getLocations();
-
-	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
-	{
-		if (it->getLocation() == loc)
-		{
-			_loc = *it;
-			return (true);
-		}
-/*		if (loc.find(it->getLocation()) != std::string::npos
-			&& ft_isBeginStr(loc, it->getLocation())
-			&& (it->getLocation().size() == 1 || loc[it->getLocation().size()] == '/'))
-		{
-			_loc = *it;
-			return (true);
-		}*/
-		if (it->getLocation().find(loc) != std::string::npos
-			&& ft_isBeginStr(it->getLocation(), loc))
-			//&& (it->getLocation().size() == 1 || loc[it->getLocation().size()] == '/'))
-		{
-			_loc = *it;
-			return (true);
-		}
-		/*else
-		{
-			return (false);
-		}*/
-	}
-	return (false);
-}
-
-bool	Response::_isAllowedMethod()
-{
-	std::vector<std::string> mths = _loc.getMethods();
-	for (std::vector<std::string>::iterator mt = mths.begin(); mt != mths.end(); mt++)
-	{
-		if (*mt == _req.getMethod())
-			return (true);
-	}
-	return (false);
-}
-
 std::string	Response::_makeResponseRedirect()
 {
 	//construir a parte de _makeReponseTestRedirect(), insertándole _loc.getReturn()
@@ -444,14 +470,14 @@ std::string Response::_parsePathUrl()
 	{
 		return (_parsePathIndex());
 	}
-	else
+	/*else
 	{
 		tmp = _loc.getRoot();
 		if (tmp[tmp.size() - 1] == '/' && _req.getPath()[0] == '/')
 			tmp.erase(tmp[tmp.size() - 1], 1);
 		return (tmp + _req.getPath());
-	}
-
+	}*/
+	return (_resourcePath);
 }
 
 std::string	Response::_parsePathIndex()
@@ -619,6 +645,7 @@ std::string Response::_makeErrorBody(unsigned short nbr)
 {
 	std::string ret;
 
+	ret += "<p><a href=\"/\">Inicio</a></p>";
 	ret += "<h3>webserv 1.0</h3>\n";
 	ret += "<h4>victofer  fortega-</h4>\n<hr>\n";
 	ret += "<h1 style=\"text-align: center\">" + ft_itoa(nbr) + "</h1>\n";
