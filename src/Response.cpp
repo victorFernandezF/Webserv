@@ -362,9 +362,7 @@ bool Response::_isPathAFile(std::string path){
 }
 
 bool Response::_isPathAccesible(std::string path){
-	if (access(path.c_str(), F_OK) != 0)
-		return false;
-	return true;
+	return access(path.c_str(), F_OK) == 0 ? true : false;
 }
 
 int	Response::_isFolderOrFile()
