@@ -45,7 +45,7 @@ class Response
 			void	_exeResponse();
 
 			bool	_isPathAFile(std::string path);
-			void 	_isPathAccesible(std::string path);
+			bool 	_isPathAccesible(std::string path);
 			std::string _autoindex();
 			int		_isFolderOrFile();
 

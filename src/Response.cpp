@@ -331,43 +331,64 @@ std::string Response::_autoindex(){
     html += "</head>\n<body>\n";
 	html += "<p><a href=\"/\">Inicio</a></p>\n";
     html += "<h1>Contenido del directorio:</h1>\n";
+	html += "<hr>";
     html += "<ul>\n";
 
 	if (access(path.c_str(), F_OK) != 0)
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_METHOD_NOT_ALLOWED)));
 
 	DIR* directory = opendir(path.c_str());
-//	if (!_isPathAFile(path)) {
-//	if (_isPathAccesible(path)) {
-        struct dirent* entry;
-        while ((entry = readdir(directory)) != NULL) {
-            std::string name = entry->d_name;
-            if (name != "." && name != "..") {
-				if (entry->d_type == DT_REG) {
-                      html += "<li><a href=\"" + _req.getPath() + "\\" + name + "\">" + name + "</a></li>\n";
-                } else if (entry->d_type == DT_DIR) {
-                      html += "<li><a href=\"" + name + "/\">" + name + "</a></li>\n";
-                }
-            }
-        }
+	if (!_isPathAFile(path) && _isPathAccesible(path)) {
+		struct dirent* entry;
+			while ((entry = readdir(directory)) != NULL) {
+				std::string name = entry->d_name;
+				if (name != "." && name != "..") {
+					if (entry->d_type == DT_REG) {
+						html += "<li><a href=\"" + _req.getPath() + "\\" + name + "\">" + name + "</a></li>\n";
+					} else if (entry->d_type == DT_DIR) {
+						html += "<li><a href=\"" + name + "/\">" + name + "</a></li>\n";
+					}
+				}
+			}
 		html += "</ul>\n";
 		html += "</body>\n</html>\n";
-//    }
+    }
 	return (html);
 }
 
 bool Response::_isPathAFile(std::string path){
-	size_t dot = path.find(".");
+	//size_t dot = path.find(".");
+	std::size_t found = path.rfind(".");
+	if (path[found + 1] == '/') return false;
+	std::cout<<found<<std::endl;
+ return true;
+	/* int size = path.size() -1;
+	std::cout<<path[0]<<std::endl;return true;
+	int pos = 0;
+	while (size){
+		if (path[size] == ".")
+			pos = size;
+		size--;
+	}
+	if (path[size + 1] == "/") return false;
+	return true; */
+/* 
+
+	std::cout << "dot "<< path << dot <<std::string::npos<<std::endl;
+	
+	
+	
+	if (path[])
 	if (dot == std::string::npos)
 		if (dot == path.size() - 1)
 			return false;
-	return true;
+	return true; */
 }
 
-void Response::_isPathAccesible(std::string path){
-	//std::string path = req.getPath();
+bool Response::_isPathAccesible(std::string path){
 	if (access(path.c_str(), F_OK) != 0)
-		_sendResponse(_makeResponse(_getErrorPage(HTTP_METHOD_NOT_ALLOWED)));
+		return false;
+	return true;
 }
 
 int	Response::_isFolderOrFile()
