@@ -81,7 +81,12 @@ std::string lcoat = _req.getPath();
 
 	if (_isLocation(_req.getPath()))
 	{
-		if (_isAllowedMethod())
+		if (!_loc.getReturn().empty())
+		{
+			_sendResponse(_makeResponseRedirect());
+			//_sendResponse(_makeResponse(_makeReponseTestRedirect()));
+		}
+		else if (_isAllowedMethod())
 		{
 			if (_req.getMethod() == "GET")
 			{
@@ -176,12 +181,15 @@ void	Response::_getMethod()
 	//std::string	path = _resourcePath;
 
 //Hay que hacer redirect?
+	/*if (!_loc.getReturn().empty())
+	{
+		_sendResponse(_makeResponse(_makeResponseRedirect()));
+		return ;
+	}*/
 
 	if (_loc.getAutoIndex() && _loc.getLocation() == _req.getPath())// && access(path.c_str(), F_OK) == 0)
 	{
-//		std::string html = _autoindex();
 		_sendResponse(_makeResponse(_autoindex()));
-		//Función de listado de ficheros, si procede, y construcción de html correspondiente
 		return ;
 	}
 	else
@@ -234,6 +242,29 @@ void	Response::_sendResponse(std::string msg)
 	//std::cout << "Bytes sent: " << bytes_sent << std::endl;
 	(void)bytes_sent;
 }
+
+std::string Response::_makeResponseRedirect()
+{
+	std::string		header;
+	std::string 	body;
+
+	header += "HTTP/1.1 301 MOVED PERMANENTLY";
+	header += "\r\n";
+	header += "Connection: close";
+	header += "\r\n";
+	header += "Location: ";
+	header += _loc.getReturn();
+	header += "\r\n";
+	header += "Content-Length: ";
+	header += ft_itoa(body.size());
+	header += "\r\n";
+	header += "\r\n";
+	header += body;
+	header += "\r\n\r\n";
+
+	return (header);
+}
+
 
 std::string _makeReponseTestRedirect()
 {
@@ -452,14 +483,6 @@ void	Response::_takeForm()
 void	Response::_deleteMethod()
 {
 
-}
-
-std::string	Response::_makeResponseRedirect()
-{
-	//construir a parte de _makeReponseTestRedirect(), insertándole _loc.getReturn()
-	// en la etiqueta Location
-
-	return ("");
 }
 
 std::string Response::_parsePathUrl()
