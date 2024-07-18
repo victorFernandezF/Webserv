@@ -282,7 +282,10 @@ std::string Request::getExpect() const
 
 void	Request::_setPath(std::string path)
 {
-	this->_path = path;
+	if (path.find('&') == std::string::npos)
+		this->_path = ft_decodeHtmlChars(path);
+	else
+		this->_path = path;
 }
 
 void	Request::_setMethod(std::string method)

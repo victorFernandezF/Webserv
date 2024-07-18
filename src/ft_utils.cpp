@@ -6,7 +6,7 @@
 /*   By: fortega- <fortega-@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/21 12:30:32 by fortega-          #+#    #+#             */
-/*   Updated: 2024/07/17 08:32:05 by fortega-         ###   ########.fr       */
+/*   Updated: 2024/07/18 12:20:10 by fortega-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -357,4 +357,48 @@ std::string str_tolower(std::string str)
 	}
 
     return str;
+}
+
+char	replaceCodeHtml(std::string charCode)
+{
+	if (str_tolower(charCode) == "%20")
+		return (c_20);
+	if (str_tolower(charCode) == "%22")
+		return (c_22);
+	if (str_tolower(charCode) == "%3c")
+		return (c_3C);
+	if (str_tolower(charCode) == "%3e")
+		return (c_3E);
+	if (str_tolower(charCode) == "%23")
+		return (c_23);
+	if (str_tolower(charCode) == "%25")
+		return (c_25);
+	if (str_tolower(charCode) == "%7C")
+		return (c_20);
+	return (255);
+}
+
+std::string ft_decodeHtmlChars(std::string url)
+{
+	std::string ret;
+	std::string	charCode;
+	size_t	i = 0;
+	//size_t	pos;
+	
+	while (i < url.size())
+	{
+		if (url[i] == '%')
+		{
+			charCode = url.substr(i, 3);
+			ret += replaceCodeHtml(charCode);
+			i += 3;
+		}
+		else
+		{
+			ret += url[i];
+			i++;
+		}
+	}
+
+	return (ret);
 }

@@ -479,12 +479,12 @@ void	Response::_deleteMethod()
 {
 	std::string path = _parsePathUrl();
 	//std::cout<<"PATH -> " << path << std::endl;
-	if (!_isPathAFile(path) || !_isAllowedMethod(path))
+	if (!_isPathAFile(path))
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_NO_CONTENT)));
 	else
 	{
 		if (remove(path.c_str()) == 0)
-			_sendResponse(_makeResponse(_getErrorPage(HTTP_NO_CONTENT)));
+			_sendResponse(_makeResponse(_getErrorPage(HTTP_OK)));
 		else
 			_sendResponse(_makeResponse(_getErrorPage(HTTP_INTERNAL_SERVER_ERROR)));
 	}

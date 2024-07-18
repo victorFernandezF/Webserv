@@ -6,7 +6,7 @@
 /*   By: fortega- <fortega-@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/21 12:29:37 by fortega-          #+#    #+#             */
-/*   Updated: 2024/07/17 08:31:58 by fortega-         ###   ########.fr       */
+/*   Updated: 2024/07/18 11:30:48 by fortega-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,14 @@
 # include <limits>
 # include <vector>
 # include <algorithm>
+
+# define c_20 ' '
+# define c_22 '\"'
+# define c_3C '<'
+# define c_3E '>'
+# define c_23 '#'
+# define c_25 '%'
+# define c_7C '|'
 
 bool			ft_isBeginStr(std::string reqPath, std::string locPath);
 std::string		ft_itoa(int nbr);
@@ -29,5 +37,6 @@ bool			ft_atoiErrorPageCheck(std::string const std_str);
 bool			ft_atodCheck(const char *str);
 bool			ft_atofCheck(const char *str);
 std::string 	str_tolower(std::string s);
+std::string		ft_decodeHtmlChars(std::string url);
 
 #endif
