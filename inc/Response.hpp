@@ -42,12 +42,12 @@ class Response
 
 			Response();
 
-			void	_exeResponse();
+			void		_exeResponse();
 
-			bool	_isPathAFile(std::string path);
-			bool 	_isPathAccesible(std::string path);
+			int			_isPathOrDirectory(const std::string path);
+			bool 		_isPathAccesible(std::string path);
 			std::string _autoindex();
-			int		_isFolderOrFile();
+			int			_isFolderOrFile();
 
 			std::string	_getErrorPage(unsigned short nbr);
 			std::string	_makeErrorPage(unsigned short nrb);

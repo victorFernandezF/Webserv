@@ -78,7 +78,7 @@ void	Response::_exeResponse()
 {
 std::string lcoat = _req.getPath();
 (void)lcoat;
-
+			
 	if (_isLocation(_req.getPath()))
 	{
 		if (!_loc.getReturn().empty())
@@ -334,11 +334,11 @@ std::string Response::_autoindex(){
 	html += "<hr>";
     html += "<ul>\n";
 
-	if (access(path.c_str(), F_OK) != 0)
+	if (!_isPathAccesible(path))
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_METHOD_NOT_ALLOWED)));
 
 	DIR* directory = opendir(path.c_str());
-	if (!_isPathAFile(path) && _isPathAccesible(path)) {
+	if (_isPathOrDirectory(path) == 0) {
 		struct dirent* entry;
 			while ((entry = readdir(directory)) != NULL) {
 				std::string name = entry->d_name;
@@ -356,9 +356,16 @@ std::string Response::_autoindex(){
 	return (html);
 }
 
-bool Response::_isPathAFile(std::string path){
-	std::size_t found = path.rfind(".");
-	return path[found + 1] != '/' ? true :false;
+// Return 1 if path is file, 0 if is directory -1 if not found or doesn't exist
+int Response::_isPathOrDirectory(const std::string path){
+	struct stat datos;
+    if (stat(path.c_str(), &datos) == 0){
+    	if (S_ISREG(datos.st_mode))
+			return 1;
+    	if (S_ISDIR(datos.st_mode)) 
+			return 0;
+	}
+	return -1;
 }
 
 bool Response::_isPathAccesible(std::string path){
@@ -479,7 +486,7 @@ void	Response::_deleteMethod()
 {
 	std::string path = _parsePathUrl();
 	//std::cout<<"PATH -> " << path << std::endl;
-	if (!_isPathAFile(path))
+	if (_isPathOrDirectory(path) != 0)
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_NO_CONTENT)));
 	else
 	{
