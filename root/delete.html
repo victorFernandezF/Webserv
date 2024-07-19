@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+  <head>
+    <meta charset="utf-8">
+    <title>Ejemplo método DELETE</title>
+  </head>
+  <body>
+	<p><a href="/">Inicio</a></p>
+	<h1>Enlace a carpeta upload y como usar DELETE</h1>
+	<hr />
+	<div>
+		<p><a href="/upload">Listado carpeta upload</a></p>
+		<hr />
+		<p>Debido a que solo se puede implementar mediante html los metodos GET y POST, DELETE debe ejecutarse mediante llamadas a DELETE.</p>
+		<br>
+		<p>Elegir fichero a eliminar y ejecutar desde la consola:</p>
+		<ul>
+			<li>
+				<p>curl -X "DELETE" host:puerto/ubicacion/fichero</p>
+			</li>
+		</ul>
+		<p>Ejemplo:</p>
+		<p>curl -X "DELETE" 127.0.0.1:1717/upload/fichero.txt</p>
+	</div>
+  </body>
+</html>

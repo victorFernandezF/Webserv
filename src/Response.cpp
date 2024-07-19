@@ -78,7 +78,7 @@ void	Response::_exeResponse()
 {
 std::string lcoat = _req.getPath();
 (void)lcoat;
-			
+
 	if (_isLocation(_req.getPath()))
 	{
 		if (!_loc.getReturn().empty())
@@ -138,8 +138,8 @@ bool	Response::_isLocation(std::string loc)
 			_loc = *it;
 			return (true);
 		}*/
-		
-	
+
+
 		if (/*it->getLocation().find(loc) != std::string::npos
 			&& */ft_isBeginStr(loc, it->getLocation()))
 			//&& (it->getLocation().size() == 1 || loc[it->getLocation().size()] == '/'))
@@ -152,6 +152,7 @@ bool	Response::_isLocation(std::string loc)
 				_loc = *it;
 				_resourcePath = _loc.getRoot();
 				if (_resourcePath[_resourcePath.size() - 1] != '/')
+					//&& loc[0] != '/')
 					_resourcePath += '/';
 				_resourcePath += tmp;
 				return (true);
@@ -362,7 +363,7 @@ int Response::_isPathOrDirectory(const std::string path){
     if (stat(path.c_str(), &datos) == 0){
     	if (S_ISREG(datos.st_mode))
 			return 1;
-    	if (S_ISDIR(datos.st_mode)) 
+    	if (S_ISDIR(datos.st_mode))
 			return 0;
 	}
 	return -1;
@@ -414,7 +415,7 @@ void	Response::_takeFile()
 		status = stat(dir.c_str(), &fold);
 		if (status == -1)
 			mkdir(dir.c_str(), 0700);
-		
+
 		if (dir.size() - 1 != '/')
 			dir += '/';
 		dir = dir + file;
@@ -486,7 +487,7 @@ void	Response::_deleteMethod()
 {
 	std::string path = _parsePathUrl();
 	//std::cout<<"PATH -> " << path << std::endl;
-	if (_isPathOrDirectory(path) != 0)
+	if (_isPathOrDirectory(path) == -1)
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_NO_CONTENT)));
 	else
 	{
@@ -561,7 +562,7 @@ std::string	Response::_getFile(std::string name)
 
 	/*int	syze = ret.size();
 	(void)syze;*/
-	
+
 	return (ret);
 }
 
