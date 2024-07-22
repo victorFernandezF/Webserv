@@ -126,12 +126,12 @@ bool	Response::_isLocation(std::string loc)
 	}
 	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
 	{
-		if (it->getLocation() == loc)
+/*		if (it->getLocation() == loc)
 		{
 			_loc = *it;
 			return (true);
 		}
-/*		if (loc.find(it->getLocation()) != std::string::npos
+		if (loc.find(it->getLocation()) != std::string::npos
 			&& ft_isBeginStr(loc, it->getLocation())
 			&& (it->getLocation().size() == 1 || loc[it->getLocation().size()] == '/'))
 		{
@@ -480,7 +480,7 @@ std::string	Response::_cleanBoundary()
 
 void	Response::_takeForm()
 {
-
+	_sendResponse(_makeResponse(_req.getBody()));
 }
 
 void	Response::_deleteMethod()

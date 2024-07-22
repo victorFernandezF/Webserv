@@ -39,6 +39,7 @@ Request::Request(Request const &src)
 	this->_header = src._header;
 	this->_body = src._body;
 	this->_headerParams = src._headerParams;
+	this->_varUrl = src._varUrl;
 	this->_isHeader = src._isHeader;
 	return ;
 }
@@ -64,6 +65,7 @@ Request	&Request::operator=(Request const &rhs)
 		this->_header = rhs._header;
 		this->_body = rhs._body;
 		this->_headerParams = rhs._headerParams;
+		this->_varUrl = rhs._varUrl;
 		this->_isHeader = rhs._isHeader;
 	}
 	return (*this);
@@ -88,6 +90,7 @@ void	Request::_parseRequest(std::string req)
 		pos = req.find("\r\n");
 		_firstLine(req.substr(0, pos));
 		req.erase(0, pos + 2);
+		_urlSetVar();
 	}
 	if (req.find("\r\n\r\n") != std::string::npos)
 	{
@@ -131,6 +134,28 @@ void	Request::_firstLine(std::string str)
 		else if (j == 3)
 			_setVersion(ret);
 		j++;
+	}
+}
+
+void	Request::_urlSetVar()
+{
+	size_t	pos = _path.find("?");
+	std::string params;
+
+	if (pos == std::string::npos)
+		return;
+	
+	params = _path.substr(pos + 1);
+	_path = _path.substr(0, pos);
+
+	std::istringstream	toRead(params);
+	std::string		 buff;
+
+	while (getline(toRead, buff, '&'))
+	{
+		pos = buff.find('=');
+		if (pos != std::string::npos)
+			_varUrl[buff.substr(0, pos)] = buff.substr(pos + 1);
 	}
 }
 
