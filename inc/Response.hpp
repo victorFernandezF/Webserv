@@ -69,6 +69,7 @@ class Response
 			std::string _parsePathIndex();
 			std::string	_parsePathUrl();
 			std::string _getFile(std::string name);
+			std::string	_getExtFile(std::string filename);
 			std::string	_takeContentType(std::string filename);
 			void	_takeFile();
 			std::string	_getFileName();

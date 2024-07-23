@@ -90,7 +90,7 @@ void	Request::_parseRequest(std::string req)
 		pos = req.find("\r\n");
 		_firstLine(req.substr(0, pos));
 		req.erase(0, pos + 2);
-		_urlSetVar();
+		//_urlSetVar();
 	}
 	if (req.find("\r\n\r\n") != std::string::npos)
 	{
@@ -231,9 +231,9 @@ bool	Request::areBody()
 		bodySize = getContentLength();
 	else
 		return (true);
-	std::cout << "Excpect  : " << getExpect() << std::endl;
+/*	std::cout << "Excpect  : " << getExpect() << std::endl;
 	std::cout << "Bodycount: " << getBody().length() << std::endl;
-	std::cout << "bodySize : " << bodySize << std::endl;
+	std::cout << "bodySize : " << bodySize << std::endl;*/
 	if (getBody().size() == bodySize)
 		return (true);
 	return (false);
@@ -307,10 +307,26 @@ std::string Request::getExpect() const
 
 void	Request::_setPath(std::string path)
 {
-	if (path.find('&') == std::string::npos)
-		this->_path = ft_decodeHtmlChars(path);
-	else
-		this->_path = path;
+	size_t	pos = path.find("?");
+	std::string params;
+
+	if (pos != std::string::npos)
+	{	
+		params = path.substr(pos + 1);
+		_path = path.substr(0, pos);
+
+		std::istringstream	toRead(params);
+		std::string		 buff;
+
+		while (getline(toRead, buff, '&'))
+		{
+			pos = buff.find('=');
+			if (pos != std::string::npos)
+				_varUrl[buff.substr(0, pos)] = buff.substr(pos + 1);
+		}
+	}
+	//if (_path.find('&') == std::string::npos)
+	this->_path = ft_decodeHtmlChars(path);
 }
 
 void	Request::_setMethod(std::string method)

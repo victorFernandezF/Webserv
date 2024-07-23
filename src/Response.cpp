@@ -124,8 +124,27 @@ bool	Response::_isLocation(std::string loc)
 			return (true);
 		}
 	}
+
 	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
 	{
+		std::string ext = "*." + _getExtFile(loc);
+		if (it->getLocation() == ext)
+		{
+			_loc = *it;
+			pos = loc.find_last_of("/");
+			tmp = loc.substr(pos + 1);
+			_resourcePath = _loc.getRoot();
+			if (_resourcePath[_resourcePath.size() - 1] != '/')
+				//&& loc[0] != '/')
+				_resourcePath += '/';
+			_resourcePath += tmp;
+			return (true);
+		}
+	}
+
+	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
+	{
+		//std::string ext = "*." + _getExtFile(loc);
 /*		if (it->getLocation() == loc)
 		{
 			_loc = *it;
@@ -187,17 +206,22 @@ void	Response::_getMethod()
 		_sendResponse(_makeResponse(_makeResponseRedirect()));
 		return ;
 	}*/
-
-	if (_loc.getAutoIndex() && _loc.getLocation() == _req.getPath())// && access(path.c_str(), F_OK) == 0)
+	if (!_loc.getCompiler().empty())
+	{
+		_sendResponse(_makeResponse("Ejecutar CGI"));
+	}
+	else if (_loc.getAutoIndex() && _loc.getLocation() == _req.getPath())// && access(path.c_str(), F_OK) == 0)
 	{
 		_sendResponse(_makeResponse(_autoindex()));
-		return ;
 	}
-	else
+	else if (_isPathOrDirectory(_resourcePath) != -1)
 	{
 		_sendResponse(_makeResponse(_getFile(_parsePathUrl())));
 		//_sendResponse(_makeResponse(_getFile(_resourcePath)));
-		return ;
+	}
+	else
+	{
+		_sendResponse(_makeResponse(_getErrorPage(HTTP_NOT_FOUND)));
 	}
 }
 
@@ -566,15 +590,25 @@ std::string	Response::_getFile(std::string name)
 	return (ret);
 }
 
-std::string Response::_takeContentType(std::string filename)
+std::string	Response::_getExtFile(std::string filename)
 {
-	std::string ret;
-	std::string ext;
+	std::string	ret;
 	size_t		pos = filename.find_last_of(".");
 
 	if (pos != std::string::npos)
-		ext = str_tolower(filename.substr(pos + 1));
-	else
+		ret = str_tolower(filename.substr(pos + 1));
+	return (ret);
+}
+
+std::string Response::_takeContentType(std::string filename)
+{
+//	std::string ret;
+	std::string ext = _getExtFile(filename);
+//	size_t		pos = filename.find_last_of(".");
+
+//	if (pos != std::string::npos)
+//		ext = str_tolower(filename.substr(pos + 1));
+	if (ext.empty())
 		return("unknown");
 
 	if (ext == "html")
