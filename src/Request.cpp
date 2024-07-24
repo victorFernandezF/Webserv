@@ -310,6 +310,11 @@ std::string Request::getExpect() const
 	return (ret);
 }
 
+void	Request::setVarsUrl(std::map<std::string, std::string> vars)
+{
+	this->_varUrl = vars;
+}
+
 void	Request::_setPath(std::string path)
 {
 	size_t	pos = path.find("?");
@@ -330,8 +335,8 @@ void	Request::_setPath(std::string path)
 				_varUrl[buff.substr(0, pos)] = buff.substr(pos + 1);
 		}
 	}
-	//if (_path.find('&') == std::string::npos)
-	this->_path = ft_decodeHtmlChars(path);
+	else
+		this->_path = ft_decodeHtmlChars(path);
 }
 
 void	Request::_setMethod(std::string method)

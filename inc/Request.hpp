@@ -58,6 +58,7 @@ class Request
 		std::string getContentType() const;
 		std::string getBoundary() const;
 		std::string	getExpect() const;
+		void	setVarsUrl(std::map<std::string, std::string> vars);
 };
 
 std::ostream	&operator<<(std::ostream &o, Request const &i);

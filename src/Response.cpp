@@ -573,7 +573,23 @@ std::string	Response::_exeCgi()
 
 void	Response::_takeForm()
 {
-	_sendResponse(_makeResponse(_req.getBody()));
+	std::istringstream toRead(_req.getBody());
+	std::map<std::string, std::string>	vars;
+	std::string	buff;
+	size_t		pos;
+
+	while (getline(toRead, buff, '&'))
+	{
+		pos = buff.find('=');
+		if (pos != std::string::npos)
+			vars[buff.substr(0, pos)] = buff.substr(pos + 1);
+	}
+	_req.setVarsUrl(vars);
+	if (!_loc.getCompiler().empty())
+		_sendResponse(_makeResponse(_exeCgi()));
+	else
+		_sendResponse(_makeResponse(_getErrorPage(HTTP_OK)));
+	//_sendResponse(_makeResponse(_req.getBody()));
 }
 
 void	Response::_deleteMethod()
@@ -666,6 +682,9 @@ std::string	Response::_getExtFile(std::string filename)
 
 	if (pos != std::string::npos)
 		ret = str_tolower(filename.substr(pos + 1));
+	pos = ret.find('?');
+	if (pos != std::string::npos)
+		ret = ret.substr(0, pos);
 	return (ret);
 }
 

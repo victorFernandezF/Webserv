@@ -199,7 +199,7 @@ class	Config::errorInCompletLocationSrv : public std::exception
 	public:
 		virtual const char *what(void) const throw()
 		{
-			return ("Error: need add basic \"location\" params: allow methods and \nreturn value\nor\nroot and index");
+			return ("Error: need add basic \"location\" params:\nallow methods and root\nor\nreturn value");
 		}
 };
 
@@ -477,6 +477,7 @@ void	Config::_makeServers()
 					if (mainLoc.isComplet())
 					{
 						tmpServ.addLocation(mainLoc);
+						mainLoc.clear();
 					}
 					else
 					{
