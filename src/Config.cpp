@@ -474,6 +474,14 @@ void	Config::_makeServers()
 				}
 				if (brcOpen == 0)
 				{
+					if (mainLoc.isComplet())
+					{
+						tmpServ.addLocation(mainLoc);
+					}
+					else
+					{
+						throw errorInCompletLocationSrv();
+					}
 					this->_servers.push_back(tmpServ);
 					startSrv = false;
 				}
