@@ -51,6 +51,7 @@ class Request
 		std::string getBody() const;
 		std::string getHeader() const;
 		std::map<std::string, std::string>	getHeaderParams() const;
+		std::map<std::string, std::string>	getVarUrl() const;
 		bool	areHeader();
 		bool	areBody();
 		size_t	getContentLength();

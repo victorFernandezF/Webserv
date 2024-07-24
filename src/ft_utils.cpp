@@ -6,7 +6,7 @@
 /*   By: fortega- <fortega-@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/21 12:30:32 by fortega-          #+#    #+#             */
-/*   Updated: 2024/07/18 12:20:10 by fortega-         ###   ########.fr       */
+/*   Updated: 2024/07/24 09:38:56 by fortega-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -401,4 +401,43 @@ std::string ft_decodeHtmlChars(std::string url)
 	}
 
 	return (ret);
+}
+
+
+char	**makeMatArgs(std::map<std::string, std::string> vars)
+{
+	char 		**mat = new char*[vars.size() + 1];
+	std::string val;
+	size_t 		i = 0;
+	size_t		j;
+
+	for (std::map<std::string, std::string>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+	{
+		val = it->first + "=" + it->second;
+		mat[i] = new char[val.size() + 1];
+		j = 0;
+		for (std::string::iterator itVal = val.begin(); itVal != val.end(); itVal++)
+		{
+			mat[i][j] = *itVal;
+			j++;
+		}
+		mat[i][j] = '\0';
+		i++;
+	}
+	mat[i] = NULL;
+	
+	return (mat);
+}
+
+void	freeMat(char **mat)
+{
+	size_t	i = 0;
+	
+	while (mat[i])
+	{
+		free(mat[i]);
+		i++;
+	}
+	free(mat[i]);
+	free(mat);
 }

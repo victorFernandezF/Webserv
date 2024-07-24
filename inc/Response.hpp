@@ -39,6 +39,7 @@ class Response
 			int		_clientFD;
 			std::string	_contentType;
 			std::string _resourcePath;
+			std::string	_responseCode;
 
 			Response();
 
@@ -58,6 +59,7 @@ class Response
 
 			std::string	_makeResponse(std::string body);
 			std::string _makeResponseRedirect();
+			std::string	_getResponseCode();
 			void	_sendResponse(std::string msg);
 
 			void	_getMethod();
@@ -74,6 +76,7 @@ class Response
 			void	_takeFile();
 			std::string	_getFileName();
 			std::string	_cleanBoundary();
+			std::string	_exeCgi();
 			void	_takeForm();
 
 //			void	_getMethodTemp();

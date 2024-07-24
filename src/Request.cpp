@@ -217,6 +217,11 @@ std::map<std::string, std::string>	Request::getHeaderParams() const
 	return (this->_headerParams);
 }
 
+std::map<std::string, std::string>	Request::getVarUrl() const
+{
+	return (this->_varUrl);
+}
+
 bool	Request::areHeader()
 {
 	return (this->_isHeader);

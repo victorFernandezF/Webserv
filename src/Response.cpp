@@ -29,6 +29,7 @@ Response::Response(Request req, Server *srv, int client)
 	_req = req;
 	_clientFD = client;
 	_contentType = "text/html";
+	_responseCode = "200 OK";
 
 	_exeResponse();
 
@@ -208,13 +209,15 @@ void	Response::_getMethod()
 	}*/
 	if (!_loc.getCompiler().empty())
 	{
-		_sendResponse(_makeResponse("Ejecutar CGI"));
+		//_sendResponse(_makeResponse("Ejecutar CGI"));
+		_sendResponse(_makeResponse(_exeCgi()));
+		//_exeCgi();
 	}
 	else if (_loc.getAutoIndex() && _loc.getLocation() == _req.getPath())// && access(path.c_str(), F_OK) == 0)
 	{
 		_sendResponse(_makeResponse(_autoindex()));
 	}
-	else if (_isPathOrDirectory(_resourcePath) != -1)
+	else if (_isPathOrDirectory(_parsePathUrl()) != -1)
 	{
 		_sendResponse(_makeResponse(_getFile(_parsePathUrl())));
 		//_sendResponse(_makeResponse(_getFile(_resourcePath)));
@@ -233,7 +236,8 @@ std::string	Response::_makeResponse(std::string body)
 	(void)syze;
 
 
-	ret += "HTTP/1.1 200 OK";
+	ret += "HTTP/1.1 ";//200 OK";
+	ret += _getResponseCode();
 	ret += "\r\n";
 	ret += "Connection: close";
 	ret += "\r\n";
@@ -289,7 +293,6 @@ std::string Response::_makeResponseRedirect()
 
 	return (header);
 }
-
 
 std::string _makeReponseTestRedirect()
 {
@@ -502,6 +505,72 @@ std::string	Response::_cleanBoundary()
 	return (ret);
 }
 
+std::string	Response::_exeCgi()
+{
+	std::string	ret;
+	int			pFd[2];
+	int			pid;
+	int			status;
+
+	if (_isPathOrDirectory(_resourcePath) != 1)
+		return(_getErrorPage(HTTP_NOT_FOUND));
+
+	status = pipe(pFd);
+	if (status == -1)
+		return (_getErrorPage(HTTP_INTERNAL_SERVER_ERROR));
+	
+	pid = fork();
+	if (pid == -1)
+		return (_getErrorPage(HTTP_INTERNAL_SERVER_ERROR));
+	if (pid == 0)
+	{
+		dup2(pFd[1], STDOUT_FILENO);
+		close(pFd[0]);
+		close(pFd[1]);
+
+		char *args[] = {
+					(char*)_loc.getCompiler().c_str(), 
+					(char*)_resourcePath.c_str(), 
+					(char)0
+				};
+		char **envArgs = makeMatArgs(_req.getVarUrl());
+
+		execve(_loc.getCompiler().c_str(), args, envArgs);
+		freeMat(envArgs);
+		exit(0);
+	}
+	else
+	{
+		char	buff[512];
+		int		reads;
+
+		dup2(pFd[0], STDIN_FILENO);
+		close(pFd[1]);
+
+		reads = read(pFd[0], buff, 512);
+		while (reads > 0)
+		{
+			ret += buff;
+			reads = read(pFd[0], buff, 512);
+		}
+		close(pFd[0]);
+
+		int	waitSt;
+		waitpid(pid, &waitSt, 0);
+		if (WIFEXITED(waitSt))
+		{
+			status = WEXITSTATUS(waitSt);
+			if (status != 0)
+				return (_getErrorPage(HTTP_INTERNAL_SERVER_ERROR));
+		}
+		else
+		{
+			return (_getErrorPage(HTTP_INTERNAL_SERVER_ERROR));
+		}
+	}
+	return (ret);
+}
+
 void	Response::_takeForm()
 {
 	_sendResponse(_makeResponse(_req.getBody()));
@@ -647,6 +716,8 @@ std::string	Response::_getErrorPage(unsigned short nbr)
 	std::string filePath;
 	std::map<unsigned short, std::string>	pages = _srv.getErrorPageMap();
 
+	_responseCode = ft_itoa(nbr) + " " + _getCodePageText(nbr);
+
 	if (pages.find(nbr) != pages.end())
 		filePath = pages[nbr];
 	if (!filePath.empty())
@@ -677,7 +748,7 @@ std::string	Response::_makeErrorPage(unsigned short nbr)
 {
 	std::string ret;
 
-	if (nbr != 201)
+	if (nbr > 399)
 		ret += _makeHtmlHead("Error");
 	ret += _makeErrorBody(nbr);
 	ret += _makeHtmlTail();
@@ -770,6 +841,11 @@ Server Response::getServer() const
 int	Response::getClientFD() const
 {
 	return (_clientFD);
+}
+
+std::string	Response::_getResponseCode()
+{
+	return (_responseCode);
 }
 
 std::string Response::getContentType() const
