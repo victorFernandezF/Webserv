@@ -45,6 +45,7 @@ class Response
 
 			void		_exeResponse();
 
+			std::string	_parseRoute(std::string path);
 			int			_isPathOrDirectory(const std::string path);
 			bool 		_isPathAccesible(std::string path);
 			std::string _autoindex();

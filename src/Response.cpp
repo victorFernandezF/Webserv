@@ -114,8 +114,16 @@ std::string lcoat = _req.getPath();
 bool	Response::_isLocation(std::string loc)
 {
 	std::vector<Location> paths = _srv.getLocations();
+	std::map<std::string, std::string> headerParams = _req.getHeaderParams();
 	size_t pos;
 	std::string tmp;
+
+	if (headerParams.find("Referer") != headerParams.end())
+	{
+		std::string refer = headerParams["Referer"];
+		pos = refer.find(headerParams["Host"]);
+		loc = refer.substr(pos + headerParams["Host"].size()) + loc;
+	}
 
 	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
 	{
@@ -382,6 +390,22 @@ std::string Response::_autoindex(){
 		html += "</body>\n</html>\n";
     }
 	return (html);
+}
+
+std::string	Response::_parseRoute(std::string path)
+{
+	std::string	ret;
+	size_t		pos = path.find(' ');
+
+	while (pos != std::string::npos)
+	{
+		ret += path.substr(0, pos);
+		ret += 92;
+		ret += 32;
+		path = path.substr(pos + 1);
+		pos = path.find(' ');
+	}
+	return (ret);
 }
 
 // Return 1 if path is file, 0 if is directory -1 if not found or doesn't exist
@@ -698,8 +722,7 @@ std::string Response::_takeContentType(std::string filename)
 //		ext = str_tolower(filename.substr(pos + 1));
 	if (ext.empty())
 		return("unknown");
-
-	if (ext == "html")
+	if (ext == "html" || ext == "htm")
 		return ("text/html");
 	else if (ext == "txt")
 		return ("text/plain");
@@ -733,12 +756,18 @@ std::string	Response::_getErrorPage(unsigned short nbr)
 {
 	std::string	ret;
 	std::string filePath;
+	std::string	dir = _loc.getRoot();
 	std::map<unsigned short, std::string>	pages = _srv.getErrorPageMap();
 
 	_responseCode = ft_itoa(nbr) + " " + _getCodePageText(nbr);
 
 	if (pages.find(nbr) != pages.end())
+	{
 		filePath = pages[nbr];
+		if (dir.size() - 1 != '/')
+				dir += '/';
+		filePath = dir + filePath;
+	}
 	if (!filePath.empty())
 	{
 		std::ifstream	file(filePath.c_str());

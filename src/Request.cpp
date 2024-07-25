@@ -164,7 +164,8 @@ void	Request::_setHeaderParams(std::string header)
 	std::vector<std::string>	tmpVect;
 	std::istringstream			toRead(header);
 	std::string					tmp;
-	std::string					ret;
+	std::string					key;
+	std::string					val;
 	size_t						pos;
 
 	while (getline(toRead, tmp))
@@ -173,7 +174,14 @@ void	Request::_setHeaderParams(std::string header)
 		{
 			pos = tmp.find(':');
 			//std::cout << "1-> " << tmp.substr(0, pos - 1) << "-----" << "2-> " << tmp.substr(pos) << std::endl;
-			this->_headerParams[tmp.substr(0, pos)] = tmp.substr(pos + 2);
+			key = tmp.substr(0, pos);
+			tmp = tmp.substr(pos + 2);
+			pos = tmp.find('\r');
+			val = tmp.substr(0, pos);
+			this->_headerParams[key] = val;
+			key.clear();
+			val.clear();
+			//this->_headerParams[tmp.substr(0, pos)] = tmp.substr(pos + 2);
 		}
 	}
 	if (!this->_headerParams.empty())
