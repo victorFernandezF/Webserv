@@ -39,6 +39,7 @@ class Response
 			int		_clientFD;
 			std::string	_contentType;
 			std::string _resourcePath;
+			std::string _referedLoc;
 			std::string	_responseCode;
 
 			Response();

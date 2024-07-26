@@ -114,16 +114,17 @@ std::string lcoat = _req.getPath();
 bool	Response::_isLocation(std::string loc)
 {
 	std::vector<Location> paths = _srv.getLocations();
-	std::map<std::string, std::string> headerParams = _req.getHeaderParams();
+//	std::map<std::string, std::string> headerParams = _req.getHeaderParams();
 	size_t pos;
 	std::string tmp;
 
-	if (headerParams.find("Referer") != headerParams.end())
+/*	if (headerParams.find("Referer") != headerParams.end())
 	{
 		std::string refer = headerParams["Referer"];
 		pos = refer.find(headerParams["Host"]);
 		loc = refer.substr(pos + headerParams["Host"].size()) + loc;
-	}
+		_referedLoc = loc;
+	}*/
 
 	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
 	{
@@ -239,6 +240,7 @@ void	Response::_getMethod()
 std::string	Response::_makeResponse(std::string body)
 {
 	std::string ret;
+//	std::map<std::string, std::string> headerParams = _req.getHeaderParams();
 
 	int	syze = body.size();
 	(void)syze;
@@ -254,6 +256,13 @@ std::string	Response::_makeResponse(std::string body)
 	ret += "\r\n";
 	ret += "Content-Length: ";
 	ret += ft_itoa(body.size());
+/*	if (!_referedLoc.empty() && headerParams.find("Host") != headerParams.end())
+	{
+		ret += "\r\n";
+		ret += "Referer: ";
+		ret += headerParams["Host"] + _referedLoc;
+	}
+*/
 	ret += "\r\n";
 	ret += "\r\n";
 	ret += body;
@@ -542,7 +551,7 @@ std::string	Response::_exeCgi()
 	status = pipe(pFd);
 	if (status == -1)
 		return (_getErrorPage(HTTP_INTERNAL_SERVER_ERROR));
-	
+
 	pid = fork();
 	if (pid == -1)
 		return (_getErrorPage(HTTP_INTERNAL_SERVER_ERROR));
@@ -553,8 +562,8 @@ std::string	Response::_exeCgi()
 		close(pFd[1]);
 
 		char *args[] = {
-					(char*)_loc.getCompiler().c_str(), 
-					(char*)_resourcePath.c_str(), 
+					(char*)_loc.getCompiler().c_str(),
+					(char*)_resourcePath.c_str(),
 					(char)0
 				};
 		char **envArgs = makeMatArgs(_req.getVarUrl());
@@ -672,7 +681,7 @@ std::string	Response::_getFile(std::string name)
 
 	file.open(name.c_str(), std::ifstream::in);
 
-	if (!file.is_open())
+	if (!file.is_open() || _isPathOrDirectory(name) != 1)
 		return (_getErrorPage(HTTP_NOT_FOUND));
 
 	_contentType = _takeContentType(name);
