@@ -30,6 +30,8 @@
 # define HTTP_REQUEST_URI_TOO_LONG 414
 # define HTTP_INTERNAL_SERVER_ERROR 500
 
+# define URI_MAX_SIZE 128
+
 class Response
 {
 	private:

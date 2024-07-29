@@ -462,7 +462,7 @@ int	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *se
 		//this->_pollFDs.erase(_pollFDs.begin() + i);
 		//i--;
 		//pollSize--;
-		std::cout << "Error reading from client" << std::endl;
+		std::cerr << "Error reading from client" << std::endl;
 		return (-1);
 	}
 	else

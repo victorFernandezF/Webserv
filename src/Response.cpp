@@ -80,6 +80,11 @@ void	Response::_exeResponse()
 std::string lcoat = _req.getPath();
 (void)lcoat;
 
+	if (_srv.getServerName().size() + _req.getPath().size() > URI_MAX_SIZE)
+		_sendResponse(_makeResponse(_getErrorPage(HTTP_REQUEST_URI_TOO_LONG)));
+	if (_req.getContentLength() > _srv.getClientBSize())
+		_sendResponse(_makeResponse(_getErrorPage(HTTP_REQUEST_ENTITY_TOO_LARGE)));
+
 	if (_isLocation(_req.getPath()))
 	{
 		if (!_loc.getReturn().empty())

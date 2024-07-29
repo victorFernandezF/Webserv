@@ -255,8 +255,9 @@ bool	Request::areBody()
 size_t	Request::getContentLength()
 {
 	std::map<std::string, std::string> tmp = this->_headerParams;
-
-	return (ft_atoiUnInt(tmp["Content-Length"]));
+	if (tmp.find("Content-Length") != tmp.end())
+		return (ft_atoiUnInt(tmp["Content-Length"]));
+	return (0);		
 }
 
 std::string Request::getContentType() const
