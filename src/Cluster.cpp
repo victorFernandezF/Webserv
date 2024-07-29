@@ -449,6 +449,7 @@ int	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *se
 	char		buff[BUFFSIZE];
 	int			reads = 0;
 
+
 	reads = recv(client.fd, buff, BUFFSIZE, 0);
 	if (reads > 0)
 	{
@@ -468,6 +469,9 @@ int	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *se
 	else
 	{
 		Request tmp(_tmpRecv[client.fd], client.fd, *server);
+		std::cout << "Lleva: " << _tmpRecv[client.fd].size() << std::endl;
+		std::cout << "Hasta: " << tmp.getContentLength() << std::endl;
+		std::cout << "Queda: " << tmp.getContentLength() - _tmpRecv[client.fd].size() << std::endl;
 		if (tmp.areHeader() && tmp.areBody())
 		{
 			std::cout << "Conexión " << client.fd << " , Is complete" << std::endl;

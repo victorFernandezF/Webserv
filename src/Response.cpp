@@ -113,7 +113,6 @@ std::string lcoat = _req.getPath();
 	{
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_NOT_FOUND)));
 	}
-
 }
 
 bool	Response::_isLocation(std::string loc)
@@ -196,6 +195,34 @@ bool	Response::_isLocation(std::string loc)
 		{
 			return (false);
 		}*/
+	}
+
+
+/*	std::map<std::string, std::string> headerParams = _req.getHeaderParams();
+	
+	if (headerParams.find("Referer") != headerParams.end())
+	{
+		std::string refer = headerParams["Referer"];
+		pos = refer.find(headerParams["Host"]);
+		loc = refer.substr(pos + headerParams["Host"].size()) + loc;
+		_referedLoc = loc;
+		_req.delHeaderParam("Referer");
+		_isLocation(loc);
+	}*/
+
+	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
+	{
+		if (it->getLocation() == "/")
+		{
+			_loc = *it;
+			_resourcePath = _loc.getRoot();
+			tmp = loc.substr(pos + it->getLocation().size());
+				if (_resourcePath[_resourcePath.size() - 1] != '/')
+					//&& loc[0] != '/')
+					_resourcePath += '/';
+				_resourcePath += tmp;
+				return (true);
+		}
 	}
 	return (false);
 }

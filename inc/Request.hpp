@@ -54,11 +54,12 @@ class Request
 		std::map<std::string, std::string>	getVarUrl() const;
 		bool	areHeader();
 		bool	areBody();
-		size_t	getContentLength();
+		size_t	getContentLength() const;
 		std::string getContentType() const;
 		std::string getBoundary() const;
 		std::string	getExpect() const;
 		void	setVarsUrl(std::map<std::string, std::string> vars);
+		void	delHeaderParam(std::string ref);
 };
 
 std::ostream	&operator<<(std::ostream &o, Request const &i);

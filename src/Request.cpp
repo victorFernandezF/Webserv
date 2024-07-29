@@ -190,6 +190,13 @@ void	Request::_setHeaderParams(std::string header)
 	}
 }
 
+void	Request::delHeaderParam(std::string ref)
+{
+	std::map<std::string, std::string>::iterator i = _headerParams.find(ref);
+
+	if (i != _headerParams.end())
+		_headerParams.erase(i);
+}
 
 /* ************************************************************************** */
 /*                             GETTERS / SETTERS                              */
@@ -252,7 +259,7 @@ bool	Request::areBody()
 	return (false);
 }
 
-size_t	Request::getContentLength()
+size_t	Request::getContentLength() const
 {
 	std::map<std::string, std::string> tmp = this->_headerParams;
 	if (tmp.find("Content-Length") != tmp.end())
