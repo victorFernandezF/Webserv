@@ -321,6 +321,15 @@ std::string Request::getExpect() const
 	return (ret);
 }
 
+unsigned int	Request::getPayloadSize()
+{
+	std::map<std::string, std::string>::iterator i = _headerParams.find("Content-Length");
+
+	if (i != _headerParams.end())
+		return (ft_atoiUnInt(_headerParams["Content-Length"]));
+	return (0);
+}
+
 void	Request::setVarsUrl(std::map<std::string, std::string> vars)
 {
 	this->_varUrl = vars;

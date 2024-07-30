@@ -359,6 +359,11 @@ int	Cluster::_readClient(pollfd &client, Server *server)
 	else
 	{
 		Request tmp(_tmpRecv[client.fd], client.fd, *server);
+		/*if (server->isSetClientBSize() && tmp.getPayloadSize() > server->getClientBSize())
+		{
+			Response(HTTP_REQUEST_ENTITY_TOO_LARGE, client.fd);
+			return (-1);
+		}*/
 		if (tmp.areHeader() && tmp.areBody())
 		{
 			return (1);

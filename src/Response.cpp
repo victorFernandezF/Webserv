@@ -115,8 +115,8 @@ bool	Response::_isLocation(std::string loc)
 {
 	std::vector<Location> paths = _srv.getLocations();
 //	std::map<std::string, std::string> headerParams = _req.getHeaderParams();
-	size_t pos;
-	std::string tmp;
+//	size_t pos;
+//	std::string tmp;
 
 /*	if (headerParams.find("Referer") != headerParams.end())
 	{
@@ -137,15 +137,19 @@ bool	Response::_isLocation(std::string loc)
 
 	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
 	{
+		std::string tmp;
+		size_t pos;
 		std::string ext = "*." + _getExtFile(loc);
 		if (it->getLocation() == ext)
 		{
 			_loc = *it;
 			pos = loc.find_last_of("/");
-			tmp = loc.substr(pos + 1);
+			if (pos != std::string::npos)
+				tmp = loc.substr(pos + 1);
+			else
+				tmp = loc;
 			_resourcePath = _loc.getRoot();
 			if (_resourcePath[_resourcePath.size() - 1] != '/')
-				//&& loc[0] != '/')
 				_resourcePath += '/';
 			_resourcePath += tmp;
 			return (true);
@@ -169,28 +173,26 @@ bool	Response::_isLocation(std::string loc)
 		}*/
 
 
-		if (/*it->getLocation().find(loc) != std::string::npos
-			&& */ft_isBeginStr(loc, it->getLocation()))
-			//&& (it->getLocation().size() == 1 || loc[it->getLocation().size()] == '/'))
+		if (ft_isBeginStr(loc, it->getLocation()) && it->getLocation() != "/")
 		{
+			std::string tmp;
+			size_t pos;
 			pos = loc.find(it->getLocation());
-			tmp = loc.substr(pos + it->getLocation().size());
+			if (pos != std::string::npos)
+				tmp = loc.substr(pos + it->getLocation().size());
+			else
+				tmp = loc;
 			if ((tmp.size() > 0 && tmp[0] == '/')
 				|| tmp.find('/') == std::string::npos)
 			{
 				_loc = *it;
 				_resourcePath = _loc.getRoot();
 				if (_resourcePath[_resourcePath.size() - 1] != '/')
-					//&& loc[0] != '/')
 					_resourcePath += '/';
 				_resourcePath += tmp;
 				return (true);
 			}
 		}
-		/*else
-		{
-			return (false);
-		}*/
 	}
 
 
@@ -198,28 +200,33 @@ bool	Response::_isLocation(std::string loc)
 	
 	if (headerParams.find("Referer") != headerParams.end())
 	{
+		size_t pos;
 		std::string refer = headerParams["Referer"];
 		pos = refer.find(headerParams["Host"]);
 		loc = refer.substr(pos + headerParams["Host"].size()) + loc;
 		_referedLoc = loc;
 		_req.delHeaderParam("Referer");
 		_isLocation(loc);
-	}*/
-
-	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
-	{
-		if (it->getLocation() == "/")
-		{
-			_loc = *it;
-			_resourcePath = _loc.getRoot();
-			tmp = loc.substr(pos + it->getLocation().size());
-				if (_resourcePath[_resourcePath.size() - 1] != '/')
-					//&& loc[0] != '/')
-					_resourcePath += '/';
-				_resourcePath += tmp;
-				return (true);
-		}
+		return (true);
 	}
+	else
+	{*/
+		for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
+		{
+	//		std::string tmp;
+	//		size_t pos;
+			if (it->getLocation() == "/")
+			{
+				_loc = *it;
+				_resourcePath = _loc.getRoot();
+	//			tmp = loc.substr(pos + it->getLocation().size());
+					if (_resourcePath[_resourcePath.size() - 1] != '/')
+						_resourcePath += '/';
+					_resourcePath += loc;
+					return (true);
+			}
+		}
+//	}
 	return (false);
 }
 

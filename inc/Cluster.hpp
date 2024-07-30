@@ -26,7 +26,7 @@
 # include "ft_utils.hpp"
 
 # define MAXCLIENT 20
-# define TIMEOUT 5
+# define TIMEOUT 30
 # define BUFFSIZE 2048
 
 class Cluster

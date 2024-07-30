@@ -57,6 +57,7 @@ class Request
 		std::string getContentType() const;
 		std::string getBoundary() const;
 		std::string	getExpect() const;
+		unsigned int	getPayloadSize();
 		void	setVarsUrl(std::map<std::string, std::string> vars);
 		void	delHeaderParam(std::string ref);
 };

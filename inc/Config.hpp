@@ -74,6 +74,8 @@ class Config
 		class errorServerNameDup;
 		class errorListenDup;
 		class errorNoLocationNoOpened;
+		class errorNoListenPort;
+		class errorNoListenAddr;
 };
 
 

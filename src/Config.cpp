@@ -266,6 +266,24 @@ class	Config::errorListenDup : public std::exception
 		}
 };
 
+class	Config::errorNoListenPort : public std::exception
+{
+	public:
+		virtual const char *what(void) const throw()
+		{
+			return ("Error: listen port needed in servers");
+		}
+};
+
+class	Config::errorNoListenAddr : public std::exception
+{
+	public:
+		virtual const char *what(void) const throw()
+		{
+			return ("Error: IP address needed in servers");
+		}
+};
+
 /* ************************************************************************** */
 /*                        CONSTRUCTORS / DESTRUCTORS                          */
 /* ************************************************************************** */
@@ -476,6 +494,10 @@ void	Config::_makeServers()
 					{
 						throw errorInCompletLocationSrv();
 					}
+					if (tmpServ.getHost().empty())
+						throw errorNoListenAddr();
+					if (tmpServ.getListen().empty())
+						throw errorNoListenPort();
 					this->_servers.push_back(tmpServ);
 					startSrv = false;
 				}
