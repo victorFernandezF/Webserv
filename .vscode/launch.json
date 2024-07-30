@@ -9,6 +9,7 @@
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/webServer",
+			//"args": ["/home/fradis/word.conf"],
 			"MIMode": "gdb",
 			"cwd": "${workspaceFolder}",
 			"setupCommands": [
