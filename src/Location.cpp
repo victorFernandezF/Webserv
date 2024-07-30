@@ -119,13 +119,6 @@ void	Location::clear()
 
 bool	Location::isComplet()
 {
-	/*if (this->_methods.empty()
-		|| ((!(this->_return.empty()) && !(this->_location.empty()))
-		|| (!(this->_location.empty()) && !(this->_root.empty())
-		&& (!(this->_index.empty()) || this->_autoindex == true || !(this->_compiler.empty())))))
-		return (true);
-	return (false);*/
-
 	if (!(this->_location.empty()))
 	{
 		if (!(this->_return.empty()))

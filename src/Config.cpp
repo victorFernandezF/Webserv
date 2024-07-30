@@ -274,16 +274,9 @@ Config::Config(std::string file, Cluster &cluster): _file(file)
 {
 	_fillCLines();
 	_checknBraces();
-
-	std::cout << std::endl;
-	for (std::vector<std::string>::iterator i = _fLines.begin(); i != _fLines.end(); i++)
-	{
-		std::cout << *i << std::endl;
-	}
-	std::cout << std::endl;
-
 	_makeServers();
 	_checkServers();
+
 	for (std::vector<Server>::iterator it = this->_servers.begin(); it != this->_servers.end(); it++)
 		cluster.addServer(*it);
 }

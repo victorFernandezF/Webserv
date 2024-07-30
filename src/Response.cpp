@@ -73,8 +73,6 @@ Response	&Response::operator=(Response const &rhs)
 /*                             MEMBER FUNCTIONS                               */
 /* ************************************************************************** */
 
-std::string _makeReponseTestRedirect();
-
 void	Response::_exeResponse()
 {
 std::string lcoat = _req.getPath();
@@ -90,13 +88,11 @@ std::string lcoat = _req.getPath();
 		if (!_loc.getReturn().empty())
 		{
 			_sendResponse(_makeResponseRedirect());
-			//_sendResponse(_makeResponse(_makeReponseTestRedirect()));
 		}
 		else if (_isAllowedMethod())
 		{
 			if (_req.getMethod() == "GET")
 			{
-				//_sendResponse(_makeReponseTestRedirect());
 				_getMethod();
 			}
 			else if (_req.getMethod() == "POST")
@@ -308,17 +304,10 @@ std::string	Response::_makeResponse(std::string body)
 
 void	Response::_sendResponse(std::string msg)
 {
-	//std::cout << "SendResponse: " << msg << std::endl;
-
 	const char *str = msg.c_str();
 	int msg_len = msg.size();
-	int bytes_sent;
 
-	bytes_sent = send(_clientFD, str, msg_len, 0);
-
-	//std::cout << "MSG size: " << msg_len << std::endl;
-	//std::cout << "Bytes sent: " << bytes_sent << std::endl;
-	(void)bytes_sent;
+	send(_clientFD, str, msg_len, 0);
 }
 
 std::string Response::_makeResponseRedirect()
@@ -332,30 +321,6 @@ std::string Response::_makeResponseRedirect()
 	header += "\r\n";
 	header += "Location: ";
 	header += _loc.getReturn();
-	header += "\r\n";
-	header += "Content-Length: ";
-	header += ft_itoa(body.size());
-	header += "\r\n";
-	header += "\r\n";
-	header += body;
-	header += "\r\n\r\n";
-
-	return (header);
-}
-
-std::string _makeReponseTestRedirect()
-{
-	std::string		header;
-	std::string 	body;
-
-	header += "HTTP/1.1 301 MOVED PERMANENTRLY";
-	header += "\r\n";
-	header += "Connection: close";
-	header += "\r\n";
-	//header += "Content-Type: text/html";//; charset=utf-8";
-	//header += "\r\n";
-//Hacer funcion std::string	Response::_makeResponseRedirect()
-	header += "Location: https://www.google.es";
 	header += "\r\n";
 	header += "Content-Length: ";
 	header += ft_itoa(body.size());
@@ -470,10 +435,6 @@ int	Response::_isFolderOrFile()
 	return (0);
 }
 
-/*void	Response::_getMethod(){
-	_sendResponse(_makeResponseTest());
-}*/
-
 void	Response::_postMethod()
 {
 	if (!(_srv.getUploadPath().empty()) && _req.getContentType().find("multipart/form-data") != std::string::npos)
@@ -496,11 +457,6 @@ void	Response::_takeFile()
 
 	dir = dir + _srv.getUploadPath();
 
-	/*std::cout << "File content:" << std::endl;
-	std::cout << "=============================" << std::endl;
-	std::cout << _cleanBoundary() << std::endl;
-	std::cout << "=============================" << std::endl;*/
-
 	if (!(data.empty()) && !(file.empty()))
 	{
 		struct stat fold;
@@ -511,9 +467,7 @@ void	Response::_takeFile()
 		if (dir.size() - 1 != '/')
 			dir += '/';
 		dir = dir + file;
-	//	std::cout << "Ruta completa: " << dir << std::endl;
 		status = open(dir.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	//	std::cout << "Status open: " << status << std::endl;
 		if (status > 0)
 		{
 			write(status, data.c_str(), data.size());
@@ -552,7 +506,6 @@ std::string	Response::_cleanBoundary()
 	std::string body = _req.getBody();
 
 	std::string boundary = "--" + _req.getBoundary() + "--";
-//	boundary += "--";
 	size_t pos = body.find("\r\n\r\n");
 	std::string tmp;
 
@@ -564,9 +517,6 @@ std::string	Response::_cleanBoundary()
 		ret = tmp.substr(0, pos - boundary.size());
 	}
 
-	/*std::cout << "??????????????????????????????" << std::endl;
-	std::cout << ret << std::endl;
-	std::cout << "??????????????????????????????" << std::endl;*/
 	return (ret);
 }
 
@@ -654,13 +604,11 @@ void	Response::_takeForm()
 		_sendResponse(_makeResponse(_exeCgi()));
 	else
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_OK)));
-	//_sendResponse(_makeResponse(_req.getBody()));
 }
 
 void	Response::_deleteMethod()
 {
 	std::string path = _parsePathUrl();
-	//std::cout<<"PATH -> " << path << std::endl;
 	if (_isPathOrDirectory(path) == -1)
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_NO_CONTENT)));
 	else
@@ -680,13 +628,6 @@ std::string Response::_parsePathUrl()
 	{
 		return (_parsePathIndex());
 	}
-	/*else
-	{
-		tmp = _loc.getRoot();
-		if (tmp[tmp.size() - 1] == '/' && _req.getPath()[0] == '/')
-			tmp.erase(tmp[tmp.size() - 1], 1);
-		return (tmp + _req.getPath());
-	}*/
 	return (_resourcePath);
 }
 
@@ -704,12 +645,9 @@ std::string	Response::_parsePathIndex()
 
 std::string	Response::_getFile(std::string name)
 {
-	//std::ifstream	file(name.c_str());
 	std::ifstream	file;
 	std::string 	ret;
-	//std::string 	line;
 	std::stringstream buff;
-	//char			buff;
 
 	file.open(name.c_str(), std::ifstream::in);
 
@@ -718,24 +656,10 @@ std::string	Response::_getFile(std::string name)
 
 	_contentType = _takeContentType(name);
 
-	/*while (getline(file, line))
-	{
-		ret += line;
-		ret += '\n';
-	}*/
-
-	/*while (file.get(buff))
-	{
-		ret += buff;
-	}*/
-
 	buff << file.rdbuf();
 	ret = buff.str();
 
 	file.close();
-
-	/*int	syze = ret.size();
-	(void)syze;*/
 
 	return (ret);
 }
@@ -755,12 +679,8 @@ std::string	Response::_getExtFile(std::string filename)
 
 std::string Response::_takeContentType(std::string filename)
 {
-//	std::string ret;
 	std::string ext = _getExtFile(filename);
-//	size_t		pos = filename.find_last_of(".");
 
-//	if (pos != std::string::npos)
-//		ext = str_tolower(filename.substr(pos + 1));
 	if (ext.empty())
 		return("unknown");
 	if (ext == "html" || ext == "htm")
@@ -951,11 +871,6 @@ std::ostream	&operator<<(std::ostream &o, Response const &i)
 	std::cout << "*******************************************************" << std::endl;
 	std::cout << std::endl << "En Response:" << std::endl << std::endl;
 	std::cout << "Cliente: " << i.getClientFD() << std::endl;
-	//std::cout << i.getRequest() << std::endl;
-	/*std::cout << std::endl << "/////////////////" << std::endl;
-	std::cout << "ContentType = " << i.getRequest().getContentType() << std::endl;
-	std::cout << "Boundry = " << i.getRequest().getBoundary() << std::endl << "/////////////////" << std::endl;*/
-	//std::cout << i.getServer() << std::endl;
 	std::cout << "*******************************************************" << std::endl;
 	return (o);
 }

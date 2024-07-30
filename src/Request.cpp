@@ -90,7 +90,6 @@ void	Request::_parseRequest(std::string req)
 		pos = req.find("\r\n");
 		_firstLine(req.substr(0, pos));
 		req.erase(0, pos + 2);
-		//_urlSetVar();
 	}
 	if (req.find("\r\n\r\n") != std::string::npos)
 	{
@@ -173,7 +172,6 @@ void	Request::_setHeaderParams(std::string header)
 		if (tmp.find(':') != std::string::npos)
 		{
 			pos = tmp.find(':');
-			//std::cout << "1-> " << tmp.substr(0, pos - 1) << "-----" << "2-> " << tmp.substr(pos) << std::endl;
 			key = tmp.substr(0, pos);
 			tmp = tmp.substr(pos + 2);
 			pos = tmp.find('\r');
@@ -181,7 +179,6 @@ void	Request::_setHeaderParams(std::string header)
 			this->_headerParams[key] = val;
 			key.clear();
 			val.clear();
-			//this->_headerParams[tmp.substr(0, pos)] = tmp.substr(pos + 2);
 		}
 	}
 	if (!this->_headerParams.empty())
@@ -251,9 +248,7 @@ bool	Request::areBody()
 		bodySize = getContentLength();
 	else
 		return (true);
-/*	std::cout << "Excpect  : " << getExpect() << std::endl;
-	std::cout << "Bodycount: " << getBody().length() << std::endl;
-	std::cout << "bodySize : " << bodySize << std::endl;*/
+
 	if (getBody().size() == bodySize)
 		return (true);
 	return (false);

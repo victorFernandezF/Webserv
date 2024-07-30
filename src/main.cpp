@@ -1,25 +1,11 @@
 #include <iostream>
-#include <signal.h>
 
 #include "Cluster.hpp"
 #include "Config.hpp"
 
-/*void handler(int s)
-{
-
-}*/
-
 
 int	main(int argc, char **argv)
 {
-	/*struct sigaction sigIntHandler;
-
-   sigIntHandler.sa_handler = handler;
-   sigemptyset(&sigIntHandler.sa_mask);
-   sigIntHandler.sa_flags = 0;
-
-   sigaction(SIGINT, &sigIntHandler, NULL);*/
-
 	std::string file;
 
 	if (argc > 2)
@@ -32,7 +18,6 @@ int	main(int argc, char **argv)
 	{
 		Cluster cluster;
 		Config test(file, cluster);
-		std::cout << cluster << std::endl;
 		cluster.runServers();
 		cluster._closeFDs();
 	}

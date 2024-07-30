@@ -46,8 +46,7 @@ class Cluster
 		bool	_isServerFD(int fd);
 		pollfd	_makeClientPoll(int fd);
 		Server	*_getServerbyFD(int fd);
-		//void	_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *server);
-		int	_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *server);
+		int	_readClient(pollfd &client, Server *server);
 		bool	_isCompleteRequest(std::string req);
 
 		void	_response(pollfd &client);

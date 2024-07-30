@@ -83,8 +83,6 @@ class Response
 			std::string	_exeCgi();
 			void	_takeForm();
 
-//			void	_getMethodTemp();
-
 	public:
 		Response(Response const &src);
 		Response(Request req, Server *srv, int client);

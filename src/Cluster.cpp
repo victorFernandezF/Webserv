@@ -36,7 +36,7 @@ class	Cluster::errorBindSocket : public std::exception
 	public:
 		virtual const char *what(void) const throw()
 		{
-			return ("Error: bind socket error");
+			return ("Error: bind socket error, IP or port unavailable");
 		}
 };
 
@@ -156,10 +156,7 @@ int		Cluster::_startSocket(Server &server, std::string port)
 
 	status = bind(fd, (struct sockaddr *)&sa, sizeof sa);	//Asigna dirección local para la escucha
 	if (status != 0)
-	{
-		std::cout << "[Server] Bind error: [" << status << "] -> " << strerror(errno) << std::endl;
 		throw errorBindSocket();
-	}
 
 	status = listen(fd, MAXCLIENT);				//Escucha en el fd del socket con cola de 20
 	if (status != 0)
@@ -188,21 +185,10 @@ void	Cluster::_makeServerPolls()
 
 void	Cluster::runServers()
 {
-	//Revisar tema de MAXCLIENTS
-
-
 	_startListen();
 	_makeServerPolls();
 
-	std::cout << std::endl << "Poll's" << std::endl << std::endl;
-
-	for (std::vector<pollfd>::iterator it = this->_pollFDs.begin(); it != this->_pollFDs.end(); it++)
-	{
-		std::cout << "fd: " << it->fd << std::endl;
-		std::cout << "events: " << it->events << std::endl;
-		std::cout << "revents: " << it->revents << std::endl;
-	}
-	std::cout << std::endl;
+	std::cout << *this << std::endl;
 
 	while (1)
 	{
@@ -224,39 +210,11 @@ void	Cluster::runServers()
 		}
 		else
 		{
-			/*if (status == 0)
-			{
-				loops++;
-				//si devulve 0, poll correcto pero sin cambios
-				std::cout << "Esperando conexiones..." << std::endl;
-				if (loops == 5)
-				{
-					loops = 0;
-					system("clear");
-				}
-				//std::cout << time(NULL) << std::endl;
-				continue ;
-			}*/
 			for (size_t i = 0; i < pollSize; i++)
 			{
-				/*std::cout << "·························" << std::endl;
-				std::cout << "PollSize: " << pollSize << std::endl;
-				std::cout << "PollObject" << std::endl;
-				std::cout << "Fd: " << _pollFDs[i].fd << std::endl;
-				std::cout << "Events: " << _pollFDs[i].events << std::endl;
-				std::cout << "Revents: " << _pollFDs[i]. revents << std::endl;
-				std::cout << "·························" << std::endl;*/
-				/*if (!_isServerFD(_pollFDs[i].fd))
-				{
-					std::cout << "Now time: " << std::clock() << " - Init time: " << _timeOuts[_pollFDs[i].fd] << std::endl;
-					std::cout << "Time: " << (( std::clock() - _timeOuts[_pollFDs[i].fd] ) / (double)(CLOCKS_PER_SEC * 1000)) << std::endl;
-				}*/
 				if (!_isServerFD(_pollFDs[i].fd)
 					&& _timeOuts[_pollFDs[i].fd] < time(NULL))
-				//	&&((( std::clock() - _timeOuts[_pollFDs[i].fd] ) / (double)(CLOCKS_PER_SEC * 1000)) > 500))
 				{
-					std::cout << "Time out fd " << _pollFDs[i].fd << std::endl;
-					std::cout << "Time conexion " << _timeOuts[_pollFDs[i].fd] << " - Time exit: " << time(NULL) << std::endl;
 					Response(HTTP_REQUEST_TIMEOUT, _pollFDs[i].fd);
 					close(_pollFDs[i].fd);
 					_clients.erase(_pollFDs[i].fd);
@@ -278,10 +236,7 @@ void	Cluster::runServers()
 							std::cerr << "Error accepting client" << std::endl;
 							continue ;
 						}
-						std::cout << "Cliente conectado en fd: " << tmpFD << std::endl;
-						//_timeOuts[tmpFD] = std::clock();
 						_timeOuts[tmpFD] = time(NULL) + TIMEOUT;
-						std::cout << "Init time: " << _timeOuts[tmpFD] << std::endl;
 						_tmpRecv[tmpFD] = "";
 						_clients[tmpFD] = _getServerbyFD(_pollFDs[i].fd);
 						_pollFDs.push_back(_makeClientPoll(tmpFD));
@@ -293,8 +248,7 @@ void	Cluster::runServers()
 					else if (!_isServerFD(_pollFDs[i].fd) && pollSize < MAXCLIENT)
 					{
 						//Si no es el socket servidor, es un socket cliente, leer
-						//_readClient(i, pollSize, _pollFDs[i], _clients[_pollFDs[i].fd]);
-						status = _readClient(i, pollSize, _pollFDs[i], _clients[_pollFDs[i].fd]);
+						status = _readClient(_pollFDs[i], _clients[_pollFDs[i].fd]);
 						if (status == -1)
 						{
 							close(_pollFDs[i].fd);
@@ -303,7 +257,6 @@ void	Cluster::runServers()
 							this->_pollFDs.erase(_pollFDs.begin() + i);
 							i--;
 							pollSize--;
-							//_timeOuts[_pollFDs[i].fd].erase();
 						}
 						else if (status == 1)
 						{
@@ -314,8 +267,7 @@ void	Cluster::runServers()
 				}
 				if (_pollFDs[i].revents & POLLOUT && !_isServerFD(_pollFDs[i].fd))
 				{
-					std::cout << Response(_requests[_pollFDs[i].fd], _clients[_pollFDs[i].fd], _pollFDs[i].fd) << std::endl;
-					//_response(_pollFDs[i]);
+					Response(_requests[_pollFDs[i].fd], _clients[_pollFDs[i].fd], _pollFDs[i].fd);
 					_tmpRecv[_pollFDs[i].fd].erase();
 					_closeClient(i, pollSize, _pollFDs[i]);
 				}
@@ -335,7 +287,6 @@ void	Cluster::_closeFDs()
 		std::vector<int> FDS = srv->getFD();
 		for (std::vector<int>::iterator fd = FDS.begin(); fd != FDS.end(); fd++)
 		{
-			std::cout << "Cerrando FD " << *fd << std::endl;
 			close(*fd);
 		}
 	}
@@ -343,7 +294,6 @@ void	Cluster::_closeFDs()
 
 void	Cluster::_closeClient(size_t &i, size_t &pollSize, pollfd &client)
 {
-	std::cout << "Cerrando transmision con cliente " << client.fd << std::endl;
 	close(client.fd);
 	_clients.erase(client.fd);
 	this->_pollFDs.erase(_pollFDs.begin() + i);
@@ -389,63 +339,8 @@ pollfd	Cluster::_makeClientPoll(int fd)
 	return (pollFd);
 }
 
-/*void	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *server)
+int	Cluster::_readClient(pollfd &client, Server *server)
 {
-	std::cout << "Recibiendo datos de cliente en fd: " << client.fd << ", de servidor: "
-	<< server->getServerName() << std::endl;
-
-	char		buff[BUFFSIZE];
-	//std::string	tmp;
-	int			reads = 0;
-	size_t		loop = 0;
-
-	while (1)
-	{
-		loop++;
-		reads = recv(client.fd, buff, BUFFSIZE, 0);
-		if (reads == -1 && loop == 1)
-		{
-			close(client.fd);
-			_clients.erase(client.fd);
-			this->_pollFDs.erase(_pollFDs.begin() + i);
-			i--;
-			pollSize--;
-			std::cout << "Error reading from client" << std::endl;
-			return ;
-		}
-		if (!(reads >= 0))
-		{
-			std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
-			std::cout << "Última linea: " << std::endl << "~~~~~~~~~~~" << buff << std::endl << "~~~~~~~~~~~" << std::endl;
-			_tmpRecv[client.fd].insert(_tmpRecv[client.fd].end(), '\0', 1);
-			client.events = POLLOUT;
-			_requests[client.fd] = Request(_tmpRecv[client.fd], client.fd, *server);
-			std::cout << Request(_tmpRecv[client.fd], client.fd, *server) << std::endl;
- 			return ;
-		}
-		if (_isCompleteRequest(tmp))
-		{
-			std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
-			tmp.insert(tmp.end(), '\0', 1);
-			client.events = POLLOUT;
-			_requests[client.fd] = Request(tmp, client.fd, *server);
-			std::cout << Request(tmp, client.fd, *server) << std::endl;
-			return ;
-		}
-		else
-		{
-			_tmpRecv[client.fd].insert(_tmpRecv[client.fd].end(), buff, buff + reads);
-		}
-	}
-}*/
-
-int	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *server)
-{
-	(void)pollSize;
-	(void)i;
-	std::cout << "Recibiendo datos de cliente en fd: " << client.fd << ", de servidor: "
-	<< server->getServerName() << std::endl;
-
 	char		buff[BUFFSIZE];
 	int			reads = 0;
 
@@ -458,43 +353,18 @@ int	Cluster::_readClient(size_t &i, size_t &pollSize, pollfd &client, Server *se
 	}
 	if (reads == -1)
 	{
-		//close(client.fd);
-		//_clients.erase(client.fd);
-		//this->_pollFDs.erase(_pollFDs.begin() + i);
-		//i--;
-		//pollSize--;
 		std::cerr << "Error reading from client" << std::endl;
 		return (-1);
 	}
 	else
 	{
 		Request tmp(_tmpRecv[client.fd], client.fd, *server);
-		std::cout << "Lleva: " << _tmpRecv[client.fd].size() << std::endl;
-		std::cout << "Hasta: " << tmp.getContentLength() << std::endl;
-		std::cout << "Queda: " << tmp.getContentLength() - _tmpRecv[client.fd].size() << std::endl;
 		if (tmp.areHeader() && tmp.areBody())
 		{
-			std::cout << "Conexión " << client.fd << " , Is complete" << std::endl;
-		/*std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
-		_tmpRecv[client.fd].insert(_tmpRecv[client.fd].end(), '\0', 1);
-		client.events = POLLOUT;
-		_requests[client.fd] = Request(_tmpRecv[client.fd], client.fd, *server);
-		std::cout << Request(_tmpRecv[client.fd], client.fd, *server) << std::endl;*/
 			return (1);
 		}
-		//std::cout << "Conexión " << client.fd << " , NOT complete ELSE" << std::endl;
 	}
-	//std::cout << "Conexión " << client.fd << " , NOT complete OUT" << std::endl;
 	return (0);
-	/*if (_isCompleteRequest(tmp))
-	{
-		std::cout << "Conexión completa de cliente en fd: " << client.fd << std::endl;
-		tmp.insert(tmp.end(), '\0', 1);
-		client.events = POLLOUT;
-		_requests[client.fd] = Request(tmp, client.fd, *server);
-		std::cout << Request(tmp, client.fd, *server) << std::endl;
-		return ;
-	}*/
 }
 
 bool	Cluster::_isCompleteRequest(std::string req)
@@ -538,13 +408,6 @@ void	Cluster::_response(pollfd &client)
 		std::cerr << "Sent partial message to client socket " << client.fd << ": " << bytes_sent
 		<< " bytes sent" << std::endl;
 	}
-	/*std::cout << "Cerrando transmision con cliente " << client.fd << std::endl;
-	close(client.fd);
-	_clients.erase(client.fd);
-	this->_pollFDs.erase(_pollFDs.begin() + i);
-	_requests.erase(_pollFDs[i].fd);
-	i--;
-	pollSize--;*/
 }
 
 std::string	Cluster::_makeResponse()
@@ -600,44 +463,16 @@ std::ostream	&operator<<(std::ostream &o, Cluster const &i)
 	std::vector<Server> _servers = i.getServers();
 	for (std::vector<Server>::iterator its = _servers.begin(); its != _servers.end(); its++)
 	{
-		size_t nbrl = 0;
 		o << std::endl << "********************************************" << std::endl << std::endl;
+		o << "Running webserver on:" << std::endl; 
 		o << "Server number " << nbrs << std::endl;
 		o << "Server name: " << its->getServerName() << std::endl;
 		o << "Host: " << its->getHost() << std::endl;
-		o << "Listen: " << std::endl;
+		o << "Listen port: " << std::endl;
 		std::vector<std::string>	tmpL = its->getListen();
 		for (std::vector<std::string>::iterator lis = tmpL.begin(); lis != tmpL.end(); lis++)
 			o << *lis << std::endl;
-		o << "File descriptor: " << std::endl;
-		std::vector<int> tmpFD = its->getFD();
-		for (std::vector<int>::iterator ifd = tmpFD.begin(); ifd != tmpFD.end(); ifd++)
-			o << *ifd << std::endl;
-		o << "Client body size: " << its->getClientBSize() << std::endl;
-		o << "Upload path: " << its->getUploadPath() << std::endl;
-		o << "Error pages:" << std::endl;
-		std::map<unsigned short, std::string> tmpPages = its->getErrorPageMap();
-		for (std::map<unsigned short, std::string>::iterator ite = tmpPages.begin(); ite != tmpPages.end(); ite++)
-			o << ite->first << " -> " << ite->second << std::endl;
-		o << std::endl << "Locations:" << std::endl;
-		std::vector<Location> tmpLocation = its->getLocations();
-		for (std::vector<Location>::iterator itl = tmpLocation.begin(); itl != tmpLocation.end(); itl++)
-		{
-			o << std::endl;
-			o << "Location number " << nbrl << std::endl;
-			o << "Location: " << itl->getLocation() << std::endl;
-			o << "Return: " << itl->getReturn() << std::endl;
-			o << "Root: " << itl->getRoot() << std::endl;
-			o << "Autoindex: " << itl->getAutoIndex() << std::endl;
-			o << "Index: " << itl->getIndex() << std::endl;
-			o << "Methods:" << std::endl;
-			std::vector<std::string> tmpMeth = itl->getMethods();
-			for (std::vector<std::string>::iterator itm = tmpMeth.begin(); itm != tmpMeth.end(); itm++)
-				o << *itm << std::endl;
-			o << "Compiler: " << itl->getCompiler() << std::endl;
-			nbrl++;
-		}
-		o << "********************************************" << std::endl << std::endl;
+		o << std::endl << "********************************************" << std::endl << std::endl;
 		nbrs++;
 	}
 	return (o);

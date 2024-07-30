@@ -28,7 +28,6 @@ class Request
 		void	_parseRequest(std::string req);
 		void	_firstLine(std::string str);
 		void	_urlSetVar();
-		//void	_body(std::string body);
 
 		void	_setPath(std::string path);
 		void	_setMethod(std::string method);
