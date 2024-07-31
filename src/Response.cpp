@@ -114,17 +114,6 @@ std::string lcoat = _req.getPath();
 bool	Response::_isLocation(std::string loc)
 {
 	std::vector<Location> paths = _srv.getLocations();
-//	std::map<std::string, std::string> headerParams = _req.getHeaderParams();
-//	size_t pos;
-//	std::string tmp;
-
-/*	if (headerParams.find("Referer") != headerParams.end())
-	{
-		std::string refer = headerParams["Referer"];
-		pos = refer.find(headerParams["Host"]);
-		loc = refer.substr(pos + headerParams["Host"].size()) + loc;
-		_referedLoc = loc;
-	}*/
 
 	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
 	{
@@ -158,20 +147,6 @@ bool	Response::_isLocation(std::string loc)
 
 	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
 	{
-		//std::string ext = "*." + _getExtFile(loc);
-/*		if (it->getLocation() == loc)
-		{
-			_loc = *it;
-			return (true);
-		}
-		if (loc.find(it->getLocation()) != std::string::npos
-			&& ft_isBeginStr(loc, it->getLocation())
-			&& (it->getLocation().size() == 1 || loc[it->getLocation().size()] == '/'))
-		{
-			_loc = *it;
-			return (true);
-		}*/
-
 
 		if (ft_isBeginStr(loc, it->getLocation()) && it->getLocation() != "/")
 		{
@@ -195,38 +170,20 @@ bool	Response::_isLocation(std::string loc)
 		}
 	}
 
-
-/*	std::map<std::string, std::string> headerParams = _req.getHeaderParams();
-	
-	if (headerParams.find("Referer") != headerParams.end())
+	for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
 	{
-		size_t pos;
-		std::string refer = headerParams["Referer"];
-		pos = refer.find(headerParams["Host"]);
-		loc = refer.substr(pos + headerParams["Host"].size()) + loc;
-		_referedLoc = loc;
-		_req.delHeaderParam("Referer");
-		_isLocation(loc);
-		return (true);
-	}
-	else
-	{*/
-		for (std::vector<Location>::iterator it = paths.begin(); it != paths.end(); it++)
+
+		if (it->getLocation() == "/")
 		{
-	//		std::string tmp;
-	//		size_t pos;
-			if (it->getLocation() == "/")
-			{
-				_loc = *it;
-				_resourcePath = _loc.getRoot();
-	//			tmp = loc.substr(pos + it->getLocation().size());
-					if (_resourcePath[_resourcePath.size() - 1] != '/')
-						_resourcePath += '/';
-					_resourcePath += loc;
-					return (true);
-			}
+			_loc = *it;
+			_resourcePath = _loc.getRoot();
+				if (_resourcePath[_resourcePath.size() - 1] != '/')
+					_resourcePath += '/';
+				_resourcePath += loc;
+				return (true);
 		}
-//	}
+	}
+
 	return (false);
 }
 
@@ -243,28 +200,17 @@ bool	Response::_isAllowedMethod()
 
 void	Response::_getMethod()
 {
-	//std::string	path = _resourcePath;
-
-//Hay que hacer redirect?
-	/*if (!_loc.getReturn().empty())
-	{
-		_sendResponse(_makeResponse(_makeResponseRedirect()));
-		return ;
-	}*/
 	if (!_loc.getCompiler().empty())
 	{
-		//_sendResponse(_makeResponse("Ejecutar CGI"));
 		_sendResponse(_makeResponse(_exeCgi()));
-		//_exeCgi();
 	}
-	else if (_loc.getAutoIndex() && _loc.getLocation() == _req.getPath())// && access(path.c_str(), F_OK) == 0)
+	else if (_loc.getAutoIndex() && _loc.getLocation() == _req.getPath())
 	{
 		_sendResponse(_makeResponse(_autoindex()));
 	}
 	else if (_isPathOrDirectory(_parsePathUrl()) != -1)
 	{
 		_sendResponse(_makeResponse(_getFile(_parsePathUrl())));
-		//_sendResponse(_makeResponse(_getFile(_resourcePath)));
 	}
 	else
 	{
@@ -275,13 +221,12 @@ void	Response::_getMethod()
 std::string	Response::_makeResponse(std::string body)
 {
 	std::string ret;
-//	std::map<std::string, std::string> headerParams = _req.getHeaderParams();
 
 	int	syze = body.size();
 	(void)syze;
 
 
-	ret += "HTTP/1.1 ";//200 OK";
+	ret += "HTTP/1.1 ";
 	ret += _getResponseCode();
 	ret += "\r\n";
 	ret += "Connection: close";
@@ -291,13 +236,6 @@ std::string	Response::_makeResponse(std::string body)
 	ret += "\r\n";
 	ret += "Content-Length: ";
 	ret += ft_itoa(body.size());
-/*	if (!_referedLoc.empty() && headerParams.find("Host") != headerParams.end())
-	{
-		ret += "\r\n";
-		ret += "Referer: ";
-		ret += headerParams["Host"] + _referedLoc;
-	}
-*/
 	ret += "\r\n";
 	ret += "\r\n";
 	ret += body;
@@ -519,7 +457,6 @@ std::string	Response::_cleanBoundary()
 	if(pos != std::string::npos)
 	{
 		tmp = body.substr(pos + 4);
-		//pos = tmp.find(boundary);
 		pos = tmp.find_last_of("\r\n");
 		ret = tmp.substr(0, pos - boundary.size());
 	}
@@ -875,9 +812,6 @@ std::string Response::getContentType() const
 
 std::ostream	&operator<<(std::ostream &o, Response const &i)
 {
-	std::cout << "*******************************************************" << std::endl;
-	std::cout << std::endl << "En Response:" << std::endl << std::endl;
-	std::cout << "Cliente: " << i.getClientFD() << std::endl;
-	std::cout << "*******************************************************" << std::endl;
+	(void)i;
 	return (o);
 }

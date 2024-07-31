@@ -82,6 +82,8 @@ Cluster::Cluster(Cluster const &src)
 	this->_pollFDs = src._pollFDs;
 	this->_clients = src._clients;
 	this->_requests = src._requests;
+	this->_tmpRecv = src._tmpRecv;
+	this->_timeOuts = src._timeOuts;
 	return ;
 }
 
@@ -103,6 +105,8 @@ Cluster	&Cluster::operator=(Cluster const &rhs)
 		this->_pollFDs = rhs._pollFDs;
 		this->_clients = rhs._clients;
 		this->_requests = rhs._requests;
+		this->_tmpRecv = rhs._tmpRecv;
+		this->_timeOuts = rhs._timeOuts;
 	}
 	return (*this);
 }
@@ -359,11 +363,6 @@ int	Cluster::_readClient(pollfd &client, Server *server)
 	else
 	{
 		Request tmp(_tmpRecv[client.fd], client.fd, *server);
-		/*if (server->isSetClientBSize() && tmp.getPayloadSize() > server->getClientBSize())
-		{
-			Response(HTTP_REQUEST_ENTITY_TOO_LARGE, client.fd);
-			return (-1);
-		}*/
 		if (tmp.areHeader() && tmp.areBody())
 		{
 			return (1);
