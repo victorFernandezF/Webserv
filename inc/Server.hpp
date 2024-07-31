@@ -50,6 +50,7 @@ class Server
 		std::map<unsigned short, std::string> getErrorPageMap() const;
 		std::vector<int> const	&getFD() const;
 		std::vector<Location>	getLocations() const;
+		Location	getMainLoc() const;
 
 		void	clear();
 };

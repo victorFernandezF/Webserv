@@ -79,9 +79,15 @@ std::string lcoat = _req.getPath();
 (void)lcoat;
 
 	if (_srv.getServerName().size() + _req.getPath().size() > URI_MAX_SIZE)
+	{
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_REQUEST_URI_TOO_LONG)));
+		return ;
+	}
 	if (_req.getContentLength() > _srv.getClientBSize())
+	{
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_REQUEST_ENTITY_TOO_LARGE)));
+		return ;
+	}
 
 	if (_isLocation(_req.getPath()))
 	{
@@ -221,10 +227,8 @@ void	Response::_getMethod()
 std::string	Response::_makeResponse(std::string body)
 {
 	std::string ret;
-
-	int	syze = body.size();
-	(void)syze;
-
+	int	siz = body.size();
+	(void)siz;
 
 	ret += "HTTP/1.1 ";
 	ret += _getResponseCode();
@@ -240,9 +244,6 @@ std::string	Response::_makeResponse(std::string body)
 	ret += "\r\n";
 	ret += body;
 	ret += "\r\n\r\n";
-
-	int	syze2 = ret.size();
-	(void)syze2;
 
 	return (ret);
 }
@@ -554,7 +555,11 @@ void	Response::_deleteMethod()
 {
 	std::string path = _parsePathUrl();
 	if (_isPathOrDirectory(path) == -1)
-		_sendResponse(_makeResponse(_getErrorPage(HTTP_NO_CONTENT)));
+	{
+		_sendResponse("HTTP/1.1 204 Not Content\r\nConnection: close\r\n");
+		//_sendResponse(_makeResponse(_getErrorPage(204)));
+		//_sendResponse(_makeResponse(_getErrorPage(HTTP_NO_CONTENT)));
+	}
 	else
 	{
 		if (remove(path.c_str()) == 0)
@@ -661,7 +666,7 @@ std::string	Response::_getErrorPage(unsigned short nbr)
 {
 	std::string	ret;
 	std::string filePath;
-	std::string	dir = _loc.getRoot();
+	std::string	dir = _srv.getMainLoc().getRoot();
 	std::map<unsigned short, std::string>	pages = _srv.getErrorPageMap();
 
 	_responseCode = ft_itoa(nbr) + " " + _getCodePageText(nbr);
@@ -701,8 +706,11 @@ std::string	Response::_makeErrorPage(unsigned short nbr)
 {
 	std::string ret;
 
-	if (nbr > 399)
+	/*if (nbr > 399)
 		ret += _makeHtmlHead("Error");
+	else
+		ret += _makeHtmlHead("");*/
+	ret += _makeHtmlHead(_getCodePageText(nbr));
 	ret += _makeErrorBody(nbr);
 	ret += _makeHtmlTail();
 

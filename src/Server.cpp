@@ -193,6 +193,11 @@ std::vector<Location>	Server::getLocations() const
 		return (this->_locations);
 }
 
+Location	Server::getMainLoc() const
+{
+	return (_locations[0]);
+}
+
 /* ************************************************************************** */
 /*                             MEMBER EXCEPTIONS                               */
 /* ************************************************************************** */
