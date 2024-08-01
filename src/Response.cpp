@@ -75,9 +75,6 @@ Response	&Response::operator=(Response const &rhs)
 
 void	Response::_exeResponse()
 {
-std::string lcoat = _req.getPath();
-(void)lcoat;
-
 	if (_srv.getServerName().size() + _req.getPath().size() > URI_MAX_SIZE)
 	{
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_REQUEST_URI_TOO_LONG)));
@@ -98,9 +95,7 @@ std::string lcoat = _req.getPath();
 		else if (_isAllowedMethod())
 		{
 			if (_req.getMethod() == "GET")
-			{
 				_getMethod();
-			}
 			else if (_req.getMethod() == "POST")
 				_postMethod();
 			else if (_req.getMethod() == "DELETE")
@@ -274,39 +269,6 @@ std::string Response::_makeResponseRedirect()
 	header += "\r\n";
 	header += body;
 	header += "\r\n\r\n";
-
-	return (header);
-}
-
-std::string _makeResponseTest()
-{
-	std::ifstream	file("./root/index.html");
-	std::string		line;
-	std::string		header;
-	std::string 	body;
-
-	while (getline(file, line))
-	{
-		body += line;
-		body += '\n';
-	}
-
-	file.close();
-
-	header += "HTTP/1.1 200 OK";
-	header += "\r\n";
-	header += "Connection: close";
-	header += "\r\n";
-	header += "Content-Type: text/html";
-	header += "\r\n";
-	header += "Content-Length: ";
-	header += ft_itoa(body.size());
-	header += "\r\n";
-	header += "\r\n";
-	header += body;
-	header += "\r\n\r\n";
-
-	std::cout << std::endl;
 
 	return (header);
 }

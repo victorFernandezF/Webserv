@@ -195,7 +195,15 @@ std::vector<Location>	Server::getLocations() const
 
 Location	Server::getMainLoc() const
 {
-	return (_locations[0]);
+	std::vector<Location> tmp = getLocations();
+	Location	ret;
+
+	for (std::vector<Location>::iterator it = tmp.begin(); it != tmp.end(); it++)
+	{
+		if (it->getLocation() == "/")
+			return (*it);
+	}
+	return (ret);
 }
 
 /* ************************************************************************** */
