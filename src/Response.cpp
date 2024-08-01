@@ -215,7 +215,6 @@ void	Response::_getMethod()
 	}
 	else
 	{
-		std::cout << "Not found GET" << std::endl;
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_NOT_FOUND)));
 	}
 }
@@ -324,8 +323,6 @@ std::string	Response::_parseRoute(std::string path)
 // Return 1 if path is file, 0 if is directory -1 if not found or doesn't exist
 int Response::_isPathOrDirectory(const std::string path){
 	struct stat datos;
-
-	std::cout << "entra comprobacion pathOr: " << path << std::endl;
     if (stat(path.c_str(), &datos) == 0){
     	if (S_ISREG(datos.st_mode))
 			return 1;
@@ -351,7 +348,8 @@ void	Response::_postMethod()
 	else if (_req.getContentType().find("application/x-www-form-urlencoded") != std::string::npos)
 		_takeForm();
 	else
-		_sendResponse(_makeResponse(_getErrorPage(HTTP_METHOD_NOT_ALLOWED)));
+		_getMethod();
+		//_sendResponse(_makeResponse(_getErrorPage(HTTP_METHOD_NOT_ALLOWED)));
 }
 
 void	Response::_takeFile()
@@ -434,8 +432,6 @@ std::string	Response::_cleanBoundary()
 
 std::string	Response::_exeCgi()
 {
-	std::cout << "exeCgi" << std::endl;
-
 	std::string	ret;
 	int			readsTot = 0;
 	int			pFd[2];
@@ -563,7 +559,6 @@ std::string	Response::_parsePathIndex()
 		ret += '/';
 	ret += _loc.getIndex();
 
-	std::cout << "Ret parseIndex: " << ret << std::endl;
 	return (ret);
 }
 
@@ -572,15 +567,21 @@ std::string	Response::_getFile(std::string name)
 	std::ifstream	file;
 	std::string 	ret;
 	std::stringstream buff;
+	std::string tmp = name;
 
 	file.open(name.c_str(), std::ifstream::in);
-
-	std::cout << "Busca en getFile: " << name << std::endl;
+	
+	if (name[name.size() - 1] != '/')
+			tmp += '/';
+	tmp += _loc.getIndex();
 
 	if (!file.is_open() || _isPathOrDirectory(name) != 1)
 	{
-		std::cout << "Devuelve not found en getFile" << std::endl;
-		return (_getErrorPage(HTTP_NOT_FOUND));
+		file.open(tmp.c_str(), std::ifstream::in);
+		if (!file.is_open() || _isPathOrDirectory(tmp) != 1)
+		{
+			return (_getErrorPage(HTTP_NOT_FOUND));
+		}
 	}
 
 	_contentType = _takeContentType(name);
@@ -589,9 +590,6 @@ std::string	Response::_getFile(std::string name)
 	ret = buff.str();
 
 	file.close();
-
-	std::cout << "File: " << name << std::endl;
-	std::cout << ret << std::endl;
 
 	return (ret);
 }
@@ -661,7 +659,6 @@ std::string	Response::_getErrorPage(unsigned short nbr)
 				dir += '/';
 		filePath = dir + filePath;
 	}
-	std::cout << "MakeErrorPage filepath: " << filePath << std::endl;
 	if (!filePath.empty())
 	{
 		std::ifstream	file(filePath.c_str());

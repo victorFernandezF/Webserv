@@ -365,7 +365,7 @@ int	Cluster::_readClient(pollfd &client, Server *server)
 		Request tmp(_tmpRecv[client.fd], client.fd, *server);
 		if (tmp.areHeader() && tmp.areBody())
 		{
-			return (1);
+				return (1);
 		}
 	}
 	return (0);

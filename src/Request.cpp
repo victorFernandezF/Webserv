@@ -244,6 +244,24 @@ bool	Request::areBody()
 	std::map<std::string, std::string> tmp = this->_headerParams;
 	unsigned int	bodySize;
 
+	if (tmp.find("Transfer-Encoding") != tmp.end() && tmp["Transfer-Encoding"] == "chunked")
+	{
+		std::istringstream	toRead(_body);
+		std::string			tmp;
+		while (getline(toRead, tmp))
+		{
+			std::cout << "lleva: " << _body.size() << std::endl;
+			if (tmp == "0\r")
+				return (true);
+			else
+				return (false);
+		}
+		return (false);
+		/*if (_body.find("0\r\n") != std::string::npos)
+			return (true);
+		else
+			return (false);*/
+	}
 	if (tmp.find("Content-Type") != tmp.end() || getExpect() == "100-continue")
 		bodySize = getContentLength();
 	else
