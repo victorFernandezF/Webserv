@@ -215,6 +215,7 @@ void	Response::_getMethod()
 	}
 	else
 	{
+		std::cout << "Not found GET" << std::endl;
 		_sendResponse(_makeResponse(_getErrorPage(HTTP_NOT_FOUND)));
 	}
 }
@@ -222,8 +223,6 @@ void	Response::_getMethod()
 std::string	Response::_makeResponse(std::string body)
 {
 	std::string ret;
-	int	siz = body.size();
-	(void)siz;
 
 	ret += "HTTP/1.1 ";
 	ret += _getResponseCode();
@@ -325,6 +324,8 @@ std::string	Response::_parseRoute(std::string path)
 // Return 1 if path is file, 0 if is directory -1 if not found or doesn't exist
 int Response::_isPathOrDirectory(const std::string path){
 	struct stat datos;
+
+	std::cout << "entra comprobacion pathOr: " << path << std::endl;
     if (stat(path.c_str(), &datos) == 0){
     	if (S_ISREG(datos.st_mode))
 			return 1;
@@ -370,8 +371,12 @@ void	Response::_takeFile()
 		struct stat fold;
 		status = stat(dir.c_str(), &fold);
 		if (status == -1)
-			mkdir(dir.c_str(), 0700);
-
+			status = mkdir(dir.c_str(), 0700);
+		if (status == -1)
+		{
+			_sendResponse(_makeResponse(_getErrorPage(HTTP_FORBIDDEN)));
+			return ;
+		}
 		if (dir.size() - 1 != '/')
 			dir += '/';
 		dir = dir + file;
@@ -429,6 +434,8 @@ std::string	Response::_cleanBoundary()
 
 std::string	Response::_exeCgi()
 {
+	std::cout << "exeCgi" << std::endl;
+
 	std::string	ret;
 	int			readsTot = 0;
 	int			pFd[2];
@@ -526,8 +533,6 @@ void	Response::_deleteMethod()
 	if (_isPathOrDirectory(path) == -1)
 	{
 		_sendResponse("HTTP/1.1 204 Not Content\r\nConnection: close\r\n");
-		//_sendResponse(_makeResponse(_getErrorPage(204)));
-		//_sendResponse(_makeResponse(_getErrorPage(HTTP_NO_CONTENT)));
 	}
 	else
 	{
@@ -558,6 +563,7 @@ std::string	Response::_parsePathIndex()
 		ret += '/';
 	ret += _loc.getIndex();
 
+	std::cout << "Ret parseIndex: " << ret << std::endl;
 	return (ret);
 }
 
@@ -569,8 +575,13 @@ std::string	Response::_getFile(std::string name)
 
 	file.open(name.c_str(), std::ifstream::in);
 
+	std::cout << "Busca en getFile: " << name << std::endl;
+
 	if (!file.is_open() || _isPathOrDirectory(name) != 1)
+	{
+		std::cout << "Devuelve not found en getFile" << std::endl;
 		return (_getErrorPage(HTTP_NOT_FOUND));
+	}
 
 	_contentType = _takeContentType(name);
 
@@ -578,6 +589,9 @@ std::string	Response::_getFile(std::string name)
 	ret = buff.str();
 
 	file.close();
+
+	std::cout << "File: " << name << std::endl;
+	std::cout << ret << std::endl;
 
 	return (ret);
 }
@@ -647,6 +661,7 @@ std::string	Response::_getErrorPage(unsigned short nbr)
 				dir += '/';
 		filePath = dir + filePath;
 	}
+	std::cout << "MakeErrorPage filepath: " << filePath << std::endl;
 	if (!filePath.empty())
 	{
 		std::ifstream	file(filePath.c_str());
@@ -675,10 +690,6 @@ std::string	Response::_makeErrorPage(unsigned short nbr)
 {
 	std::string ret;
 
-	/*if (nbr > 399)
-		ret += _makeHtmlHead("Error");
-	else
-		ret += _makeHtmlHead("");*/
 	ret += _makeHtmlHead(_getCodePageText(nbr));
 	ret += _makeErrorBody(nbr);
 	ret += _makeHtmlTail();

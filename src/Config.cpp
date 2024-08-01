@@ -149,6 +149,15 @@ class	Config::errorReAssingRoot : public std::exception
 		}
 };
 
+class	Config::errorReAssingMethods : public std::exception
+{
+	public:
+		virtual const char *what(void) const throw()
+		{
+			return ("Error: reassigning allow methods param");
+		}
+};
+
 class	Config::errorReAssingClientBodySize : public std::exception
 {
 	public:
@@ -236,6 +245,15 @@ class	Config::errorReAssingAutoIndex : public std::exception
 		virtual const char *what(void) const throw()
 		{
 			return ("Error: reassigning autoindex param");
+		}
+};
+
+class	Config::errorBadAutoIndexParam : public std::exception
+{
+	public:
+		virtual const char *what(void) const throw()
+		{
+			return ("Error: bad autoindex param, only \"on\" or not include param ");
 		}
 };
 
@@ -577,6 +595,8 @@ void	Config::_addServerParam(Server &srv, Location &location, std::string key, s
 	{
 		if (location.getMethods().empty())
 			location.setMethods(_parseMethods(val));
+		else
+			throw errorReAssingMethods();
 	}
 	else if (key == "upload_path")
 	{
@@ -691,6 +711,7 @@ std::vector<std::string> Config::_parseMethods(std::string &val)
 	std::istringstream			toRead(val);
 	std::string					tmp;
 
+
 	while (getline(toRead, tmp, ','))
 	{
 		tmpVect.push_back(tmp);
@@ -791,13 +812,8 @@ void	Config::_addLocationParam(Location &location, std::string key, std::string 
 	{
 		if (location.getMethods().empty())
 			location.setMethods(_parseMethods(val));
-
-
-
-		//Revisar si necesario exception!!!!!!!!
-
-
-
+		else
+			throw errorReAssingMethods();
 	}
 	else if (key == "index")
 	{
@@ -820,7 +836,7 @@ void	Config::_addLocationParam(Location &location, std::string key, std::string 
 			if (_parseVal(val) == "on")
 				location.setAutoIndex(true);
 			else
-				throw errorReAssingAutoIndex();
+				throw errorBadAutoIndexParam();
 		}	
 		else
 		{
@@ -860,54 +876,6 @@ void	Config::_checkServers()
 				}
 			}
 		}
-	}
-}
-
-void	Config::_printServers()
-{
-	size_t nbrs = 1;
-	
-	for (std::vector<Server>::iterator its = _servers.begin(); its != _servers.end(); its++)
-	{
-		size_t nbrl = 0;
-		std::cout << std::endl << "********************************************" << std::endl << std::endl;
-		std::cout << "Server number " << nbrs << std::endl;
-		std::cout << "Server name: " << its->getServerName() << std::endl;
-		std::cout << "Host: " << its->getHost() << std::endl;
-		std::cout << "Listen: " << std::endl;
-		std::vector<std::string>	tmpL = its->getListen();
-		for (std::vector<std::string>::iterator lis = tmpL.begin(); lis != tmpL.end(); lis++)
-			std::cout << *lis << std::endl;
-		std::cout << "File descriptor: " << std::endl;
-		std::vector<int> tmpFD = its->getFD();
-		for (std::vector<int>::iterator ifd = tmpFD.begin(); ifd != tmpFD.end(); ifd++)
-			std::cout << *ifd << std::endl;
-		std::cout << "Client body size: " << its->getClientBSize() << std::endl;
-		std::cout << "Upload path: " << its->getUploadPath() << std::endl;
-		std::cout << "Error pages:" << std::endl;
-		std::map<unsigned short, std::string> tmpPages = its->getErrorPageMap();
-		for (std::map<unsigned short, std::string>::iterator ite = tmpPages.begin(); ite != tmpPages.end(); ite++)
-			std::cout << ite->first << " -> " << ite->second << std::endl;
-		std::cout << std::endl << "Locations:" << std::endl;
-		std::vector<Location> tmpLocation = its->getLocations();
-		for (std::vector<Location>::iterator itl = tmpLocation.begin(); itl != tmpLocation.end(); itl++)
-		{
-			std::cout << std::endl;
-			std::cout << "Location number " << nbrl << std::endl;
-			std::cout << "Location: " << itl->getLocation() << std::endl;
-			std::cout << "Return: " << itl->getReturn() << std::endl; 
-			std::cout << "Root: " << itl->getRoot() << std::endl;
-			std::cout << "Autoindex: " << itl->getAutoIndex() << std::endl;
-			std::cout << "Index: " << itl->getIndex() << std::endl;
-			std::cout << "Methods:" << std::endl;
-			std::vector<std::string> tmpMeth = itl->getMethods();
-			for (std::vector<std::string>::iterator itm = tmpMeth.begin(); itm != tmpMeth.end(); itm++)
-				std::cout << *itm << std::endl;
-			std::cout << "Compiler: " << itl->getCompiler() << std::endl;
-			nbrl++;
-		}
-		std::cout << "********************************************" << std::endl << std::endl;
-		nbrs++;
 	}
 }
 

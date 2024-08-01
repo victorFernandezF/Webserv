@@ -237,17 +237,6 @@ std::string Location::getCompiler() const
 
 std::ostream	&operator<<(std::ostream &o, Location const &i)
 {
-	std::vector<std::string>				mth = i.getMethods();
-
-	std::cout << "Location info:" << std::endl << std::endl;
-	std::cout << "Location: " << i.getLocation() << std::endl;
-	std::cout << "Root: " << i.getRoot() << std::endl;
-	std::cout << "Autoindex = " << i.getAutoIndex() << std::endl;
-	std::cout << "Index: " << i.getIndex() << std::endl;
-	std::cout << "Methods:" << std::endl;
-	for (std::vector<std::string>::iterator it = mth.begin(); it != mth.end(); it++)
-		std::cout << *it << std::endl;
-	std::cout << "Return: " << i.getReturn() << std::endl;
-	std::cout << "Compiler: " << i.getCompiler() << std::endl;
+	(void)i;
 	return (o);
 }

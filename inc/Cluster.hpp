@@ -49,8 +49,6 @@ class Cluster
 		int	_readClient(pollfd &client, Server *server);
 		bool	_isCompleteRequest(std::string req);
 
-		void	_response(pollfd &client);
-		std::string	_makeResponse();
 		void	_closeClient(size_t &i, size_t &pollSize, pollfd &client);
 
 	public:

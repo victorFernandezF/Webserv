@@ -218,27 +218,6 @@ Location	Server::getMainLoc() const
 
 std::ostream	&operator<<(std::ostream &o, Server const &i)
 {
-	std::vector<std::string>				lst = i.getListen();
-	std::vector<int>						sFD = i.getFD();
-	std::map<unsigned short, std::string>	hp = i.getErrorPageMap();
-	std::vector<Location>					loc = i.getLocations();
-
-	std::cout << "Server info" << std::endl << std::endl;
-	std::cout << "Server name: " << i.getServerName() << std::endl;
-	std::cout << "Host: " << i.getHost() << std::endl;
-	std::cout << "Listen ports: " << std::endl;
-	for (std::vector<std::string>::iterator it = lst.begin(); it != lst.end(); it++)
-		std::cout << *it << std::endl;
-	std::cout << "Sockets FD's: " << std::endl;
-	for (std::vector<int>::iterator fds = sFD.begin(); fds != sFD.end(); fds++)
-		std::cout << *fds << std::endl;
-	std::cout << "Client body size: " << i.getClientBSize() << std::endl;
-	std::cout << "Upload path: " << i.getUploadPath() << std::endl;
-	std::cout << std::endl << "Error pages:" << std::endl;
-	for (std::map<unsigned short, std::string>::iterator it = hp.begin(); it != hp.end(); it++)
-		std::cout << it->first << " ----> " << it->second << std::endl;
-	std::cout << "Locations:" << std::endl;
-	for (std::vector<Location>::iterator l = loc.begin(); l != loc.end(); l++)
-		std::cout << *l << std::endl;
+	(void)i;
 	return (o);
 }

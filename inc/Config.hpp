@@ -37,8 +37,6 @@ class Config
 
 		void	_checkServers();
 
-		void	_printServers();
-
 	public:
 		Config(std::string file, Cluster &cluster);
 		Config(Config const &src);
@@ -61,6 +59,7 @@ class Config
 		class errorNotValidHost;
 		class errorReAssingListen;
 		class errorReAssingRoot;
+		class errorReAssingMethods;
 		class errorReAssingClientBodySize;
 		class errorReAssingUploadPath;
 		class errorReAssingErrorPages;
@@ -70,6 +69,7 @@ class Config
 		class errorNoLocationRoute;
 		class errorReAssingReturn;
 		class errorReAssingAutoIndex;
+		class errorBadAutoIndexParam;
 		class errorReAssingCompiler;
 		class errorServerNameDup;
 		class errorListenDup;

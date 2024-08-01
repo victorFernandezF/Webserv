@@ -385,15 +385,6 @@ void	Request::_setBody(std::string body)
 
 std::ostream	&operator<<(std::ostream &o, Request const &i)
 {
-	std::map<std::string, std::string>	hp = i.getHeaderParams();
-
-	std::cout << "Request info" << std::endl << std::endl;
-	std::cout << "Method: " << i.getMethod() << std::endl;
-	std::cout << "Version: " << i.getVersion() << std::endl;
-	std::cout << "Path: " << i.getPath() << std::endl;
-	std::cout << std::endl << "Header params:" << std::endl;
-	for (std::map<std::string, std::string>::iterator it = hp.begin(); it != hp.end(); it++)
-		std::cout << it->first << " ----> " << it->second << std::endl;
-	std::cout << std::endl << "Body: " << std::endl << i.getBody() << std::endl;
+	(void)i;
 	return (o);
 }

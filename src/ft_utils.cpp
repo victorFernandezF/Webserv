@@ -12,10 +12,6 @@
 
 #include "ft_utils.hpp"
 
-unsigned short	error_codes[] = {400, 401, 402, 403, 404, 405, 406, 407, 408, 409,
-								410, 411, 412, 413, 414, 415, 416, 417, 421, 422,
-								426, 500, 501, 503, 504, 505};
-
 bool	ft_isBeginStr(std::string reqPath, std::string locPath)
 {
 	size_t i = 0;
@@ -186,6 +182,10 @@ bool	ft_atoiUnIntCheck(std::string const std_str)
 
 bool	ft_atoiErrorPageCheck(std::string const std_str)
 {	
+	unsigned short	error_codes[] = {400, 401, 402, 403, 404, 405, 406, 407, 408, 409,
+								410, 411, 412, 413, 414, 415, 416, 417, 421, 422,
+								426, 500, 501, 503, 504, 505};
+
 	int		i = 0;
 	long long	s = 1;
 	long long	total = 0;

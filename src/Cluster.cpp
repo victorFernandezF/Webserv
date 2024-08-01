@@ -388,65 +388,6 @@ bool	Cluster::_isCompleteRequest(std::string req)
 	return (false);
 }
 
-void	Cluster::_response(pollfd &client)
-{
-	std::string toResponse = _makeResponse();
-	const char *msg = toResponse.c_str();
-	int msg_len = strlen(msg);
-	int bytes_sent;
-
-	std::cout << "Response: " << std::endl << msg << std::endl;
-
-	bytes_sent = send(client.fd, msg, msg_len, 0);
-	if (bytes_sent == -1)
-	{
-		std::cerr << "send error: " << strerror(errno) << std::endl;
-	}
-	else if (bytes_sent == msg_len)
-	{
-		std::cerr << std::endl << "Sent full message to client socket " << client.fd << ": "
-		<< std::endl << std::endl;
-	}
-	else
-	{
-		std::cerr << "Sent partial message to client socket " << client.fd << ": " << bytes_sent
-		<< " bytes sent" << std::endl;
-	}
-}
-
-std::string	Cluster::_makeResponse()
-{
-	std::ifstream	file("./root/index.html");
-	std::string		line;
-	std::string		header;
-	std::string 	body;
-
-	while (getline(file, line))
-	{
-		body += line;
-		body += '\n';
-	}
-
-	file.close();
-
-	header += "HTTP/1.1 200 OK";
-	header += "\r\n";
-	header += "Connection: close";
-	header += "\r\n";
-	header += "Content-Type: text/html; charset=utf-8";
-	header += "\r\n";
-	header += "Content-Length: ";
-	header += ft_itoa(body.size());
-	header += "\r\n";
-	header += "\r\n";
-	header += body;
-	header += "\r\n\r\n";
-
-	std::cout << std::endl;
-
-	return (header);
-}
-
 /* ************************************************************************** */
 /*                             GETTERS / SETTERS                              */
 /* ************************************************************************** */
