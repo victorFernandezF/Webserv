@@ -430,6 +430,7 @@ std::string	Response::_cleanBoundary()
 std::string	Response::_exeCgi()
 {
 	std::string	ret;
+	int			readsTot = 0;
 	int			pFd[2];
 	int			pid;
 	int			status;
@@ -475,10 +476,13 @@ std::string	Response::_exeCgi()
 		reads = read(pFd[0], buff, 512);
 		while (reads > 0)
 		{
+			readsTot += reads;
 			ret += buff;
 			reads = read(pFd[0], buff, 512);
 		}
 		close(pFd[0]);
+
+		ret = ret.substr(0, readsTot);
 
 		int	waitSt;
 		waitpid(pid, &waitSt, 0);
