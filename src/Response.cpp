@@ -488,10 +488,13 @@ std::string	Response::_exeCgi()
 		close(pFd[0]);
 		close(pFd[1]);
 
+		std::string compiler = _loc.getCompiler();
+		std::string resourcePath = _resourcePath;
+
 		char *args[] = {
-					(char*)_loc.getCompiler().c_str(),
-					(char*)_resourcePath.c_str(),
-					(char)0
+					(char*)compiler.c_str(),
+					(char*)resourcePath.c_str(),
+					(char*)0
 				};
 		char **envArgs = makeMatArgs(_req.getVarUrl());
 
