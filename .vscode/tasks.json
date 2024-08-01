@@ -3,7 +3,8 @@
         {
             "type": "cppbuild",
             "label": "C/C++: c++ compilar archivo activo",
-            "command": "/usr/bin/c++",
+            //"command": "/usr/bin/c++",
+            "command": "/usr/bin/g++",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",

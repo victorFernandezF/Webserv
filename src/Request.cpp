@@ -257,10 +257,6 @@ bool	Request::areBody()
 				return (false);
 		}
 		return (false);
-		/*if (_body.find("0\r\n") != std::string::npos)
-			return (true);
-		else
-			return (false);*/
 	}
 	if (tmp.find("Content-Type") != tmp.end() || getExpect() == "100-continue")
 		bodySize = getContentLength();
