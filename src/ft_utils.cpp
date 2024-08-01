@@ -257,7 +257,7 @@ char	replaceCodeHtml(std::string charCode)
 		return (c_25);
 	if (str_tolower(charCode) == "%7C")
 		return (c_20);
-	return (255);
+	return (0);
 }
 
 std::string ft_decodeHtmlChars(std::string url)
