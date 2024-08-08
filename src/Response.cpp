@@ -424,7 +424,10 @@ std::string	Response::_cleanBoundary()
 	{
 		tmp = body.substr(pos + 4);
 		pos = tmp.find_last_of("\r\n");
-		ret = tmp.substr(0, pos - boundary.size());
+		ret = tmp.substr(0, pos - boundary.size() - 3);
+		//pos = tmp.find_last_of(boundary);
+		//ret = tmp.substr(0, pos);
+
 	}
 
 	return (ret);
